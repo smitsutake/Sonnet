@@ -1,0 +1,43 @@
+import React from "react";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+
+export type ConfirmModalProps = {
+	show: boolean;
+	title: string;
+	message: React.ReactNode;
+	onHide?: () => void;
+	onConfirm: () => void;
+	extraContent?: React.ReactNode
+};
+
+const ConfirmModal: React.FC<ConfirmModalProps> = ({
+	show,
+	title,
+	message,
+	onHide,
+	onConfirm,
+	extraContent,
+}) => {
+	return (
+		<Modal show={show} onHide={onHide} centered>
+			<Modal.Header closeButton>
+				<Modal.Title>{title}</Modal.Title>
+			</Modal.Header>
+			<Modal.Body>
+				{message}
+				{extraContent}
+			</Modal.Body>
+			<Modal.Footer>
+				<Button variant="secondary" onClick={onHide}>
+					Cancel
+				</Button>
+				<Button variant="warning" data-cy="confirm-delete" onClick={onConfirm} style={{backgroundColor:"red"}}>
+					Confirm
+				</Button>
+			</Modal.Footer>
+		</Modal>
+	);
+};
+
+export default ConfirmModal;

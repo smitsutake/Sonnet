@@ -1,0 +1,90 @@
+
+.tabContainer {
+  width: 100%; 
+  margin: 0; /* Space for the navigation bar */
+  background-color: rgb(236, 244, 244); 
+  padding: 1rem; 
+  height: 100%;
+  max-height: 800px;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+/* Ensure that the tab buttons are the same size */
+.navItem {
+  flex: 1 1 0%; /* Grow and shrink evenly, don't base it on content */
+  background-color: #f8f9fa;
+}
+
+/* Style for the nav links, with corrections for the active state */
+.navLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: none;
+}
+
+/* Style for the container of the nav elements */
+.navContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem 0.25rem 0 0;
+  background-color: #f8f9fa;
+}
+
+/* Style for the content area below the tabs */
+.contentArea {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 0.25rem 0.25rem;
+  border-top: none; /* Connects the tab content with the tab buttons visually */
+  margin-top: -1px; /* This negative margin helps overlap the content box with tabs */
+}
+
+.icon {
+  height: 1.2cm;
+  background: transparent;
+}
+
+.deleteIcon {
+  width: 1rem;
+  height: 1rem;
+  background: transparent;
+}
+
+.labelBelowIcon {
+  margin-top: 0.25rem;
+}
+
+.formGroup {
+  margin-bottom: 0.2rem; /* Adjusted bottom margin for spacing */
+  margin-right: 0.2rem;
+}
+
+.saveButton,
+.convertButton {
+  margin-top: 10px; 
+  margin-right: 10px;
+  float: right; /* Aligns the button to the right */
+}
+
+.buttonContainer {
+  position: fixed;
+  top: 970px;
+  left: 15px;
+  display: flex;
+  gap: 10px;
+  float: left;
+}
+
+input:not(:placeholder-shown) {
+	cursor: move;
+}
+
+input[type="checkbox"]:hover {
+	cursor: default;
+}

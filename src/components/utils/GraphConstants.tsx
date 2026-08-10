@@ -1,0 +1,104 @@
+// GraphConstants.ts
+// Centralized constants and types for graph rendering and styling in the application.
+
+// --- Default Element Dimensions ---
+import {CellStateStyle} from "@maxgraph/core";
+import BeIcon from "/img/Cloud.png";
+import DoIcon from "/img/Function.png";
+import FeelIcon from "/img/Heart.png";
+import ConcernIcon from "/img/Risk.png";
+import WhoIcon from "/img/Stakeholder.png";
+import LineIcon from "/img/line.svg";
+
+export const LINE_SIZE = 50;             // Line length between nodes
+export const SYMBOL_WIDTH = 145;         // Base width of a symbol node
+export const SYMBOL_HEIGHT = 110;        // Base height of a symbol node
+
+// --- Vertex Font Styling ---
+export const VERTEX_FONT = {
+    size: 16,                              // Font size for text labels inside nodes
+    color: "black",                        // Default font color
+    scaleHeight: 2.375,                    //scale factor for height base on font size
+} as const;
+
+// --- Valid Symbol Keys ---
+// These keys correspond to each supported symbol type in the diagram.
+export type SymbolKey = 'FUNCTIONAL' | 'EMOTIONAL' | 'NEGATIVE' | 'QUALITY' | 'STAKEHOLDER' | 'CROWD';
+
+// --- Symbol Configuration Interface ---
+// Each symbol type includes its visual representation and metadata.
+export interface SymbolConfig {
+    type: string;                          // Display name of the symbol
+    shape: string;                         // Custom shape name used by mxGraph or renderer
+    imagePath: string;                     // Image file path used for rendering the symbol
+    scale: {                               // Width and height scale factors (relative to base dimensions)
+        width: number;
+        height: number;
+    };
+    shapeStyle?: CellStateStyle;
+    label: string;
+}
+
+// --- Symbol Configuration Map ---
+// A unified definition for all available symbol types.
+export const SYMBOL_CONFIGS: Record<SymbolKey, SymbolConfig> = {
+    FUNCTIONAL: {
+        type: "Functional",
+        shape: "parallelogramShape",
+        imagePath: DoIcon,
+        scale: {width: 1.045, height: 0.8},
+        label: "Do",
+    },
+    EMOTIONAL: {
+        type: "Emotional",
+        shape: "heartShape",
+        imagePath: FeelIcon,
+        scale: {width: 0.9, height: 0.96},
+        label: "Feel",
+    },
+    NEGATIVE: {
+        type: "Negative",
+        shape: "negativeShape",
+        imagePath: ConcernIcon,
+        scale: {width: 0.9, height: 0.96},
+        shapeStyle: {
+            fillColor: 'grey',
+        },
+        label: "Concern",
+    },
+    QUALITY: {
+        type: "Quality",
+        shape: "cloudShape",
+        imagePath: BeIcon,
+        scale: {width: 1, height: 0.8},
+        label: "Be",
+    },
+    STAKEHOLDER: {
+        type: "Stakeholder",
+        shape: "personShape",
+        imagePath: WhoIcon,
+        scale: {width: 0.6, height: 1.0},
+        shapeStyle: {
+            verticalAlign: 'top',
+            verticalLabelPosition: 'bottom',
+            autoSize: false
+        },
+        label: "Who",
+    },
+    CROWD: {
+        type: "Crowd",
+        shape: "crowdShape",
+        imagePath: WhoIcon,
+        scale: {width: 0.7, height: 1.0},
+        shapeStyle: {
+            verticalAlign: 'top',
+            verticalLabelPosition: 'bottom',
+            autoSize: false
+        },
+        label: "Who",
+    },
+};
+
+// --- Additional Assets ---
+// Path to the default line image used in the diagram.
+export const LINE_IMAGE_PATH = LineIcon;

@@ -1,0 +1,23 @@
+.delete-icon,
+.edit-icon {
+	visibility: hidden;
+	margin-right: 10px;
+}
+
+.delete-icon:hover,
+.edit-icon:hover {
+	cursor: pointer;
+}
+
+.tree-list:hover .delete-icon,
+.tree-list:hover .edit-icon {
+	visibility: visible;
+}
+
+.tree-list:hover {
+	cursor: move;
+}
+
+input:focus {
+	cursor: text;
+}
