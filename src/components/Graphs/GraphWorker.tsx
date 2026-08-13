@@ -75,7 +75,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         message: "",
         onHide: () => setErrorModal(prev => ({...prev, show: false})),
     });
-
+    const [isDragOver, setIsDragOver] = useState(false);
 
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
@@ -323,7 +323,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                                 const geo = cell.getGeometry();
                                 if (geo !== null) {
                                     const instanceId = validateInstanceId(cellID.replace("Functional-", ""));
-                                    dispatch(updatePositionForInstanceId({ instanceId, x: geo.x, y: geo.y }));
+                                    dispatch(updatePositionForInstanceId({instanceId, x: geo.x, y: geo.y}));
                                 }
                             }
                         }
@@ -690,12 +690,46 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             <Container>
                 <Row className="row">
                     <Col md={10}>
-                        <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
+                        <div
+                            id={GRAPH_DIV_ID}
+                            data-cy="graph-canvas"
+                            ref={divGraph}
+                            tabIndex={0}
+                            style={{
+                                outline: 'none',
+                                border: isDragOver ? '3px dashed #4A90D9' : 'none',
+                                transition: 'border 0.2s ease',
+                            }}
+                            onDragEnter={() => setIsDragOver(true)}
+                            onDragLeave={(e) => {
+                                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                    setIsDragOver(false);
+                                }
+                            }}
+                            onDrop={() => setIsDragOver(false)}
+                        />
                     </Col>
                     <Col md={2}>
                         <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
                     </Col>
                 </Row>
+                {cluster.ClusterGoals.length === 0 && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '43%',
+                        transform: 'translate(-50%, -50%)',
+                        textAlign: 'center',
+                        color: '#999',
+                        pointerEvents: 'none',
+                        zIndex: 10,
+                    }}>
+                        <p style={{fontSize: '20px'}}>🖼️ The canvas is empty</p>
+                        <p style={{fontSize: '14px'}}>Drag a symbol from the left toolbar onto the canvas
+                            to start modeling</p>
+                    </div>
+                )}
+
                 {(cluster.ClusterGoals.length > 0) && (!hasFunctionalGoalInCluster) && (
                     <WarningMessage message="No functional goals found" />
                 )}
