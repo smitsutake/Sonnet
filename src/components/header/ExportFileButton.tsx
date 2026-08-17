@@ -123,7 +123,13 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
             Math.max(height, layout.requiredHeight + 20) + banner.height;
         clone.setAttribute("width", String(newWidth));
         clone.setAttribute("height", String(newHeight));
-        clone.setAttribute("viewBox", `0 0 ${newWidth} ${newHeight}`);
+        // Deliberately no viewBox.
+        //
+        // The graph's SVG has none, so its contents are drawn at 1:1. Adding
+        // one here made Canvg scale the contents to fill a canvas that had
+        // already been scaled by PNG_EXPORT_SCALE, so the export came out
+        // magnified by the square of that factor and showed only a corner of
+        // the diagram.
         // A white backdrop, so the comment column is legible in a PNG.
         const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         background.setAttribute("x", "0");

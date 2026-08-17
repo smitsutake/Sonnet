@@ -85,11 +85,23 @@ export const computeArrowLines = (
 // Flat S-curve. A horizontal control point at each end keeps several arrows
 // readable when they converge on the same goal.
 export const buildArrowPath = (line: ArrowLine): string => {
-	const controlOffset = Math.max(24, Math.abs(line.fromX - line.toX) / 2);
+	// The offset is signed, not absolute.
+	//
+	// With Math.abs, a goal sitting to the RIGHT of its comment box pushed both
+	// control points outwards, so the curve looped back on itself and the
+	// arrowhead came out as a hook. Following the sign of the horizontal gap
+	// keeps both control points between the two ends, whichever way round they
+	// happen to be.
+	const gap = line.toX - line.fromX;
+	const offset = gap / 2;
+	// A purely vertical run still needs some bend, or the head has no clear
+	// direction to point along.
+	const minimumBend = gap === 0 ? 24 : 0;
+
 	return (
 		`M ${line.fromX} ${line.fromY} ` +
-		`C ${line.fromX - controlOffset} ${line.fromY}, ` +
-		`${line.toX + controlOffset} ${line.toY}, ` +
+		`C ${line.fromX + offset + minimumBend} ${line.fromY}, ` +
+		`${line.toX - offset - minimumBend} ${line.toY}, ` +
 		`${line.toX} ${line.toY}`
 	);
 };

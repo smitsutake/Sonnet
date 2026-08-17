@@ -130,10 +130,13 @@ export const buildAnnotationLayout = (
 		targetRects.forEach((target, index) => {
 			const toX = target.right;
 			const toY = target.top + target.height / 2;
-			const controlOffset = Math.max(30, Math.abs(fromX - toX) / 2);
+			// Signed, for the same reason as the on-screen arrows: an absolute
+			// offset loops the curve when the target is to the right.
+			const offset = (toX - fromX) / 2;
+			const minimumBend = toX === fromX ? 30 : 0;
 			parts.push(
-				`<path d="M ${fromX} ${fromY} C ${fromX - controlOffset} ${fromY}, `
-				+ `${toX + controlOffset} ${toY}, ${toX} ${toY}" fill="none" `
+				`<path d="M ${fromX} ${fromY} C ${fromX + offset + minimumBend} ${fromY}, `
+				+ `${toX - offset - minimumBend} ${toY}, ${toX} ${toY}" fill="none" `
 				+ `stroke="${colour}" stroke-width="1.5" `
 				+ `marker-end="url(#feedback-export-head-${index === 0 ? colour.replace("#", "") : colour.replace("#", "")})"/>`
 			);

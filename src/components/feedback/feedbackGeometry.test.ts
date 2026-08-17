@@ -188,7 +188,9 @@ describe("buildArrowPath", () => {
 		expect(path.endsWith("300 310")).toBe(true);
 	});
 
-	it("keeps a usable curve when the two ends nearly touch", () => {
+	it("bends the curve when the two ends are vertically aligned", () => {
+		// A straight vertical run leaves the arrowhead with no direction to
+		// orient along, so a fixed bend is applied instead.
 		const path = buildArrowPath({
 			key: "k",
 			itemId: "fb-1",
@@ -199,7 +201,38 @@ describe("buildArrowPath", () => {
 			toX: 100,
 			toY: 60,
 		});
-		// Minimum control offset stops the curve collapsing into a dot.
-		expect(path).toContain("76 50");
+		expect(path).toContain("124 50");
 	});
-});
+
+	it("keeps both control points between the ends, whichever way round they are", () => {
+		// Regression: an absolute offset sent both control points outwards when
+		// the target sat to the right of the box, looping the curve back on
+		// itself and turning the arrowhead into a hook.
+		const controlPointsOf = (fromX: number, toX: number) => {
+			const path = buildArrowPath({
+				key: "k",
+				itemId: "fb-1",
+				instanceId: "8-1",
+				colour: "#1c5a92",
+				fromX,
+				fromY: 100,
+				toX,
+				toY: 200,
+			});
+			const numbers = path.match(/-?\d+(\.\d+)?/g)!.map(Number);
+			// M x y C c1x c1y c2x c2y x y
+			return [numbers[2], numbers[4]];
+		};
+
+		const [leftward1, leftward2] = controlPointsOf(700, 300);
+		expect(leftward1).toBeLessThanOrEqual(700);
+		expect(leftward1).toBeGreaterThanOrEqual(300);
+		expect(leftward2).toBeLessThanOrEqual(700);
+		expect(leftward2).toBeGreaterThanOrEqual(300);
+
+		const [rightward1, rightward2] = controlPointsOf(300, 700);
+		expect(rightward1).toBeGreaterThanOrEqual(300);
+		expect(rightward1).toBeLessThanOrEqual(700);
+		expect(rightward2).toBeGreaterThanOrEqual(300);
+		expect(rightward2).toBeLessThanOrEqual(700);
+	});});
