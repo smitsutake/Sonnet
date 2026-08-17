@@ -11,6 +11,11 @@ import {useGraph} from "../context/GraphContext";
 import {returnFocusToGraph} from "../utils/GraphUtils";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import {useFeedbackContext} from "../feedback/feedbackContext";
+import {buildColourMap} from "../feedback/feedbackColours";
+import {hasGrade} from "../feedback/feedbackTypes";
+import {buildAnnotationLayout, buildGradeBanner, collectAnnotations} from "../feedback/feedbackExport";
+import {graphRectForInstanceId} from "../feedback/graphAnchors";
 
 const PNG_EXPORT_SCALE = 3;
 
@@ -19,6 +24,7 @@ const PNG_EXPORT_SCALE = 3;
 const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => {
     const {graph} = useGraph(); // Use the context to get the graph instance
     const {cluster} = useFileContext(); // Get goals and cluster from file context
+    const {items: feedbackItems, grade} = useFeedbackContext();
     const [errorModal, setErrorModal] = useState<ErrorModalProps>({
         show: false,
         title: "",
@@ -28,6 +34,108 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
 
     // Simplified logic: Export is only available when showGraphSection is true
     // This means user must be in "Render Model" interface (after clicking "Arrange Hierarchy / Render Model")
+    // Produces a copy of the graph's SVG with the feedback comments and their
+    // arrows drawn into it.
+    //
+    // The on-screen overlay is a separate SVG layered above the canvas, so it
+    // is never part of what gets serialised. Rather than try to capture two
+    // elements, the annotations are rebuilt inside a clone of the graph's own
+    // SVG, which keeps the export a single self-contained document.
+    const withFeedbackAnnotations = (
+        svgElement: SVGSVGElement,
+        graphInstance: Graph
+    ): SVGSVGElement => {
+        const clone = svgElement.cloneNode(true) as SVGSVGElement;
+        const gradeToDraw = hasGrade(grade) ? grade : null;
+        if (feedbackItems.length === 0 && !gradeToDraw) {
+            return clone;
+        }
+
+        const container = graphInstance.getContainer();
+        const containerRect = container.getBoundingClientRect();
+
+        // graphRectForInstanceId reports page coordinates; the exported SVG is
+        // measured from the container's own origin, so shift them across.
+        const toSvgSpace = (rect: {left: number; top: number; right: number; width: number; height: number}) => ({
+            left: rect.left - containerRect.left + container.scrollLeft,
+            top: rect.top - containerRect.top + container.scrollTop,
+            right: rect.right - containerRect.left + container.scrollLeft,
+            width: rect.width,
+            height: rect.height,
+        });
+
+        const colourMap = buildColourMap(feedbackItems.map((item) => item.id));
+        const annotations = collectAnnotations(
+            feedbackItems,
+            (itemId) => colourMap[itemId] ?? "#1c5a92",
+            (instanceId) => {
+                const rect = graphRectForInstanceId(graphInstance, instanceId);
+                return rect ? toSvgSpace(rect) : null;
+            }
+        );
+
+        const width = Number(clone.getAttribute("width")) || container.clientWidth;
+        const height = Number(clone.getAttribute("height")) || container.clientHeight;
+
+        const layout = buildAnnotationLayout(annotations, width, 10);
+        const newWidth = width + layout.extraWidth;
+
+        // The banner is built at the final width so it spans the comment
+        // column too, and everything below it is pushed down by its height.
+        const banner = buildGradeBanner(gradeToDraw, newWidth);
+
+        if (layout.markup === "" && banner.markup === "") {
+            return clone;
+        }
+
+        if (banner.height > 0) {
+            // Shift the existing drawing down. maxGraph renders into top-level
+            // groups, so moving those moves the whole diagram without touching
+            // any of its internal coordinates.
+            Array.from(clone.children).forEach((child) => {
+                if (child.tagName.toLowerCase() === "defs") {
+                    return;
+                }
+                const existing = child.getAttribute("transform");
+                child.setAttribute(
+                    "transform",
+                    `translate(0, ${banner.height})${existing ? ` ${existing}` : ""}`
+                );
+            });
+        }
+
+        if (layout.markup !== "") {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("data-feedback-annotations", "true");
+            group.setAttribute("transform", `translate(0, ${banner.height})`);
+            group.innerHTML = layout.markup;
+            clone.appendChild(group);
+        }
+
+        if (banner.markup !== "") {
+            const bannerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            bannerGroup.setAttribute("data-grade-banner", "true");
+            bannerGroup.innerHTML = banner.markup;
+            clone.appendChild(bannerGroup);
+        }
+
+        const newHeight =
+            Math.max(height, layout.requiredHeight + 20) + banner.height;
+        clone.setAttribute("width", String(newWidth));
+        clone.setAttribute("height", String(newHeight));
+        clone.setAttribute("viewBox", `0 0 ${newWidth} ${newHeight}`);
+        // A white backdrop, so the comment column is legible in a PNG.
+        const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        background.setAttribute("x", "0");
+        background.setAttribute("y", "0");
+        background.setAttribute("width", String(newWidth));
+        background.setAttribute("height", String(newHeight));
+        background.setAttribute("fill", "#ffffff");
+        clone.insertBefore(background, clone.firstChild);
+
+        return clone;
+    };
+
     const isModelReadyForExport = (): boolean => {
         // Only enable export when user is in Render Model interface
         // AND there are functional goals in the cluster
@@ -86,8 +194,11 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
     };
 
     // Function to export graph as an image
-    const exportGraphAsSVG = async (graph: Graph) => {
-        const svgElement = (graph) && findSVGElementInGraph(graph);
+    const exportGraphAsSVG = async (graph: Graph, includeFeedback = false) => {
+        const found = (graph) && findSVGElementInGraph(graph);
+        const svgElement = found && includeFeedback
+            ? withFeedbackAnnotations(found as SVGSVGElement, graph)
+            : found;
         if (!svgElement) {
             return;
         }
@@ -136,11 +247,16 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
     };
 
     // Function to export graph as PNG
-    const exportGraphAsPNG = async (graph: Graph) => {
-        const svgElement = (graph) && findSVGElementInGraph(graph);
-        if (!svgElement) {
+    const exportGraphAsPNG = async (graph: Graph, includeFeedback = false) => {
+        const found = (graph) && findSVGElementInGraph(graph);
+        if (!found) {
             return;
         }
+        // The annotated variant works on a detached clone, so the white
+        // background inserted below never touches what is on screen.
+        const svgElement = includeFeedback
+            ? withFeedbackAnnotations(found as SVGSVGElement, graph)
+            : found;
 
         // Append a white background rect to the SVG
         // Use D3 to select the SVG and append a white background rect
@@ -155,10 +271,26 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
         const svgString = serializer.serializeToString(svgElement);
 
         // Create a canvas element
+        //
+        // clientWidth/clientHeight are only meaningful for an element that is
+        // in the document. The annotated export works on a detached clone,
+        // where both read 0, which produced a zero-sized canvas and an empty
+        // PNG that the browser refused to download. Fall back to the width and
+        // height attributes, which the clone always carries.
+        const exportWidth =
+            svgElement.clientWidth || Number(svgElement.getAttribute('width')) || 0;
+        const exportHeight =
+            svgElement.clientHeight || Number(svgElement.getAttribute('height')) || 0;
+
+        if (exportWidth === 0 || exportHeight === 0) {
+            console.error('Could not determine export dimensions.');
+            return;
+        }
+
         const canvas = document.createElement('canvas');
         // Render at a higher pixel density for a sharper PNG export
-        canvas.width = Math.round(svgElement.clientWidth * PNG_EXPORT_SCALE);
-        canvas.height = Math.round(svgElement.clientHeight * PNG_EXPORT_SCALE);
+        canvas.width = Math.round(exportWidth * PNG_EXPORT_SCALE);
+        canvas.height = Math.round(exportHeight * PNG_EXPORT_SCALE);
 
         const context = canvas.getContext('2d');
         if (!context) {
@@ -240,6 +372,21 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                                    disabled={!graph}>
                         Export as SVG
                     </Dropdown.Item>
+                    {/* Only offered when there is feedback to draw, so the menu
+                        stays as it was for anyone not using the feature. */}
+                    {(feedbackItems.length > 0 || hasGrade(grade)) && (
+                        <>
+                            <Dropdown.Divider/>
+                            <Dropdown.Item onClick={() => exportGraphAsPNG(graph!, true)}
+                                           disabled={!graph}>
+                                Export as PNG with feedback
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => exportGraphAsSVG(graph!, true)}
+                                           disabled={!graph}>
+                                Export as SVG with feedback
+                            </Dropdown.Item>
+                        </>
+                    )}
                 </DropdownButton>
             </OverlayTrigger>
             <ErrorModal {...errorModal} />

@@ -688,12 +688,15 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 }
             />
             <Container>
+                {/* The sidebar sits to the left of the canvas so that feedback
+                    arrows, which run from the panel on the far right to shapes
+                    on the canvas, do not have to cross it. */}
                 <Row className="row">
-                    <Col md={10}>
-                        <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
-                    </Col>
                     <Col md={2}>
                         <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
+                    </Col>
+                    <Col md={10}>
+                        <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
                     </Col>
                 </Row>
                 {(cluster.ClusterGoals.length > 0) && (!hasFunctionalGoalInCluster) && (

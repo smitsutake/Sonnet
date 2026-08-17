@@ -8,6 +8,9 @@ import FileUploadSection from "./FileUploadSection";
 import {JSONData, useFileContext} from "./context/FileProvider";
 import {reset} from "./context/treeDataSlice.ts";
 import {TabContent, TreeGoal} from "./types.ts";
+import TeacherGateModal from "./feedback/TeacherGateModal";
+import {useFeedbackContext} from "./feedback/feedbackContext";
+import {parseFeedbackData} from "./feedback/feedbackTypes";
 
 const EMPTY_FILE_ALERT = "Please select a file";
 const JSON_FILE_ALERT = "Please select a JSON file.";
@@ -58,6 +61,25 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	const navigate = useNavigate();
 
 	const {dispatch} = useFileContext();
+	const {loadItems, startReviewSession, endReviewSession, reviewerName} =
+		useFeedbackContext();
+
+	const [showTeacherGate, setShowTeacherGate] = useState(false);
+
+	// Pulls the feedback block off a freshly parsed file and hands it to the
+	// feedback session. Called for every open, not just teaching-staff opens,
+	// so that a student opening a reviewed file sees the comments too.
+	const loadFeedbackFromFile = (data: JSONData) => {
+		loadItems(parseFeedbackData(data.feedback));
+	};
+
+	const handleTeacherConfirmed = (name: string) => {
+		startReviewSession(name);
+		setShowTeacherGate(false);
+		// Reviewers always arrive by opening an existing student file, so drop
+		// straight into the same open-file UI the Open Model button uses.
+		setIsDragging(true);
+	};
 
 	// Handle Create Model button click - load default data
 	const handleCreateModel = () => {
@@ -65,6 +87,9 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 			treeData: defaultTreeData,
 			tabData: createDefaultTabData()
 		}));
+		// A brand new model carries no feedback, and must not inherit whatever
+		// was loaded from a file earlier in this session.
+		loadItems(null);
 	};
 
 	const handleJSONFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -101,6 +126,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                                 tabData: initialTabs,
                                 treeData: convertedJsonData.treeData,
                             }));
+							loadFeedbackFromFile(convertedJsonData);
 							// File imported successfully, user can now click Upload button to navigate
 							console.log("File imported successfully");
 						} else {
@@ -157,6 +183,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                         tabData: initialTabs,
                         treeData: convertedJsonData.treeData,
                     }));
+					loadFeedbackFromFile(convertedJsonData);
 					
 					// File imported successfully, user can now click Upload button to navigate
 					console.log("File imported successfully (file input)");
@@ -178,6 +205,12 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 		<div className="d-flex justify-content-center mt-3">
 			{/* Error Modal while user upload wrong types or invalid files */}
 			<ErrorModal {...errorModal} />
+
+			<TeacherGateModal
+				show={showTeacherGate}
+				onCancel={() => setShowTeacherGate(false)}
+				onConfirm={handleTeacherConfirmed}
+			/>
 
 			{/* File Input */}
 			<input
@@ -230,30 +263,53 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 					</div>
 				</>
 			) : (
-				<>
-					{/* Link section is bigger than Button section, click outside Button could trigger navigation,
+				<div className="d-flex flex-column align-items-center">
+					<div className="d-flex justify-content-center">
+						{/* Link section is bigger than Button section, click outside Button could trigger navigation,
              hard code a static height for temporary, need a better solution
           */}
-					<Button 
-						variant="primary" 
-						size="lg"
-						className="me-5"
-						onClick={() => {
-							handleCreateModel();
-							navigate("/projectEdit");
-						}}
-					>
-						Create Model
-					</Button>
+						<Button
+							variant="primary"
+							size="lg"
+							className="me-5"
+							onClick={() => {
+								handleCreateModel();
+								navigate("/projectEdit");
+							}}
+						>
+							Create Model
+						</Button>
+						<Button
+							variant="primary"
+							size="lg"
+							onClick={() => {
+								// Leaving review mode here keeps the two entry points
+								// distinct: Open Model is always a plain open.
+								endReviewSession();
+								setIsDragging(true);
+							}}
+							className="align-self-start ms-5"
+						>
+							Open Model
+						</Button>
+					</div>
+
+					{/* Teaching staff entry point. Sits below the two primary actions
+					    and is styled as a link so it does not compete with them. */}
 					<Button
-						variant="primary"
-						size="lg"
-						onClick={() => setIsDragging(true)}
-						className="align-self-start ms-5"
+						variant="link"
+						size="sm"
+						className="mt-3"
+						onClick={() => setShowTeacherGate(true)}
 					>
-						Open Model
+						For Teaching Staff
 					</Button>
-				</>
+					{reviewerName !== null && (
+						<span className="text-muted small">
+							Reviewing as {reviewerName}
+						</span>
+					)}
+				</div>
 			)}
 		</div>
 	);

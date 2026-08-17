@@ -1,0 +1,198 @@
+/* Feedback panel
+ *
+ * Colours and radii deliberately follow the existing panels in SectionPanel
+ * so the reviewing view looks like the rest of the editor rather than a
+ * bolted-on extra.
+ */
+
+.feedback-panel {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	background-color: rgb(236, 244, 244);
+	padding: 10px;
+}
+
+.feedback-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.feedback-panel__title {
+	font-weight: 600;
+	font-size: 1rem;
+	margin: 0;
+}
+
+.feedback-panel__reviewer {
+	font-size: 0.75rem;
+	color: #6c757d;
+}
+
+.feedback-panel__list {
+	flex: 1;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding-right: 0.25rem;
+}
+
+.feedback-panel__empty {
+	color: #6c757d;
+	font-size: 0.85rem;
+	text-align: center;
+	padding: 1.5rem 0.5rem;
+}
+
+.feedback-box {
+	background-color: #ffffff;
+	border: 1px solid #d5dee2;
+	border-radius: 6px;
+	padding: 0.5rem;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-box--linking {
+	border-color: #2390e7;
+	box-shadow: 0 0 0 2px rgba(35, 144, 231, 0.25);
+}
+
+.feedback-box__meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.5rem;
+	font-size: 0.72rem;
+	color: #6c757d;
+	margin-bottom: 0.35rem;
+}
+
+.feedback-box__author {
+	font-weight: 600;
+	color: #495057;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.feedback-box__text {
+	width: 100%;
+	border: 1px solid #ced4da;
+	border-radius: 4px;
+	font-size: 0.85rem;
+	padding: 0.35rem;
+	resize: vertical;
+	min-height: 4.5rem;
+}
+
+.feedback-box__readonly {
+	font-size: 0.85rem;
+	white-space: pre-wrap;
+	word-break: break-word;
+	margin: 0;
+}
+
+.feedback-box__targets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	margin-top: 0.35rem;
+}
+
+.feedback-box__target-chip {
+	font-size: 0.7rem;
+	background-color: #e7f1fb;
+	border: 1px solid #b9d6f2;
+	border-radius: 999px;
+	padding: 0.05rem 0.45rem;
+	color: #1c5a92;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.feedback-box__actions {
+	display: flex;
+	gap: 0.35rem;
+	margin-top: 0.4rem;
+}
+
+/* Overlay that draws the arrows. Sits above the panels but must never eat
+ * clicks, hence pointer-events: none. */
+.feedback-arrows {
+	position: absolute;
+	inset: 0;
+	/* re-resizable puts its own stacking on the panels, so the overlay needs a
+	 * z-index above them or the arrows are painted underneath. */
+	z-index: 50;
+	/* The overlay covers the whole editor, so it must never intercept a click
+	 * meant for a goal row or the canvas. */
+	pointer-events: none;
+	/* Without an explicit size an inline SVG falls back to 300x150 in some
+	 * browsers, which clips every arrow. */
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Applied to the whole editor while a box is waiting for a goal to be picked,
+ * so it is obvious that the next click means something. */
+.feedback-linking-active [data-goal-instance] {
+	cursor: crosshair;
+	outline: 1px dashed rgba(35, 144, 231, 0.6);
+	outline-offset: 1px;
+}
+
+/* Selected comment. Selection is available to students as well as reviewers:
+ * it is how a reader works out which goals a comment refers to. */
+.feedback-box {
+	cursor: pointer;
+}
+
+.feedback-box--selected {
+	border-color: #1c5a92;
+	background-color: #f5faff;
+	box-shadow: 0 0 0 2px rgba(28, 90, 146, 0.2);
+}
+
+/* Text and buttons inside a box keep their own cursors so the box does not
+ * look like it swallows every interaction. */
+.feedback-box__text,
+.feedback-box__actions button {
+	cursor: auto;
+}
+
+.feedback-box__actions button {
+	cursor: pointer;
+}
+
+/* Goal rows a selected comment points at. Applied from FeedbackArrows so that
+ * Tree itself stays unaware of the feedback feature. */
+.feedback-goal-targeted {
+	outline: 2px solid #1c5a92;
+	outline-offset: 1px;
+	background-color: #eaf3fb !important;
+}
+
+/* Makes the link targets unmistakable while a box is armed. Without this the
+ * reviewer has no way to tell that the middle panel is the only place a link
+ * can land. */
+.feedback-linking-active [data-goal-instance]:hover {
+	outline: 2px solid #1c5a92;
+	outline-offset: 1px;
+	background-color: #eaf3fb !important;
+}
+
+/* While a box is armed, the rendered model is a link target too, so the whole
+ * canvas gets the same crosshair the hierarchy rows have. */
+.feedback-linking-active .graph-container,
+.feedback-linking-active svg {
+	cursor: crosshair;
+}

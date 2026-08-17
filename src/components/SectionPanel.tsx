@@ -2,6 +2,9 @@ import {Resizable, ResizeCallback} from "re-resizable";
 import React, {useEffect, useRef, useState} from "react";
 
 import ErrorModal from "./ErrorModal";
+import FeedbackPanel from "./feedback/FeedbackPanel";
+import FeedbackArrows from "./feedback/FeedbackArrows";
+import {useFeedbackContext} from "./feedback/feedbackContext";
 import GoalList from "./GoalList";
 import Tree from "./Tree";
 import {useFileContext} from "./context/FileProvider";
@@ -37,6 +40,10 @@ const INITIAL_PROPORTIONS = {
 
 const DEFAULT_HEIGHT = "800px";
 
+// Starting width of the feedback column. Fixed rather than proportional so
+// that turning feedback on does not reflow the three existing panels.
+const FEEDBACK_PANEL_WIDTH = 300;
+
 
 
 type SectionPanelProps = {
@@ -59,6 +66,11 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
   const [draggedItem, setDraggedItem] = useState<TreeGoal | null>(null);
   // Simply store ids of all items in the tree for fast check instead of recursive search
     const {dispatch, tree} = useFileContext();
+    const {reviewerName, items: feedbackItems, fileHadFeedback, selectedItemId} =
+    useFeedbackContext();
+    // The panel appears for a reviewer, and also for anyone opening a file that
+    // already carries feedback so students can read the comments left for them.
+    const showFeedbackSection = reviewerName !== null || fileHadFeedback;
 
   const [groupSelected, setGroupSelected] = useState<TreeGoal[]>([]);
 
@@ -228,6 +240,8 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         height: "100%",
         display: "flex",
         padding: paddingX,
+        // Positioning context for the feedback arrow overlay.
+        position: "relative",
       }}
       ref={parentRef}
       // onClick={() => setIsHintVisible(false)}
@@ -316,6 +330,32 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         {/* Third Panel Content */}
         <GraphWorker showGraphSection={showGraphSection}/>
       </Resizable>
+
+      {/* Feedback Section */}
+      {showFeedbackSection && (
+        <Resizable
+          handleClasses={{left: "left-handler"}}
+          enable={{left: true}}
+          style={{
+            ...defaultStyle,
+            display: "flex",
+          }}
+          defaultSize={{width: FEEDBACK_PANEL_WIDTH, height: "100%"}}
+          maxWidth={DEFINED_PROPORTIONS.maxWidth}
+          minWidth={DEFINED_PROPORTIONS.minWidth}
+          minHeight={DEFAULT_HEIGHT}
+        >
+          <FeedbackPanel/>
+        </Resizable>
+      )}
+
+      {showFeedbackSection && (
+        <FeedbackArrows
+          items={feedbackItems}
+          containerRef={parentRef}
+          selectedItemId={selectedItemId}
+        />
+      )}
     </div>
   );
 };

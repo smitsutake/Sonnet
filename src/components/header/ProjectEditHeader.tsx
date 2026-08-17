@@ -10,6 +10,7 @@ import {isChrome, isEdge, isOpera} from "react-device-detect";
 import ResetGraphButton from "../Graphs/ResetGraphButton.tsx";
 
 import HomeButton from "./HomeButton.tsx";
+import {GradeEditButton, GradeViewButton} from "../feedback/GradeButtons.tsx";
 
 type ProjectEditHeaderProps = {
 	showGoalSection: boolean;
@@ -40,11 +41,16 @@ const ProjectEditHeader: React.FC<ProjectEditHeaderProps> = ({
                         <ResetGraphButton variant="outline-primary" className="ms-3"/>
                     </Col>
                     <Col className="d-flex flex-column flex-sm-row gap-2 justify-content-end align-items-center">
+                        {/* Visible to anyone opening a graded model, so it sits
+                            beside Export where a student will be looking. */}
+                        <GradeViewButton/>
                         <ButtonGroup>
                             {/* Pass showGraphSection to ExportFileButton to control enablement */}
                             <ExportFileButton showGraphSection={showGraphSection}/>
                             {isBrowserSupported && <SaveFileButton/>}
                         </ButtonGroup>
+                        {/* Renders nothing unless a reviewer is signed in. */}
+                        <GradeEditButton/>
                         <HomeButton/>
                     </Col>
                 </Row>
