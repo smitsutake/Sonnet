@@ -231,7 +231,8 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                 <DropdownButton as={ButtonGroup}
                                 title="Export"
                                 variant="outline-primary"
-                                disabled={!isReady}>
+                                disabled={!isReady}
+                                className="btn-export-hover">
                     <Dropdown.Item onClick={() => exportGraphAsPNG(graph!)}
                                    disabled={!graph}>
                         Export as PNG

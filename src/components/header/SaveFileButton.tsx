@@ -100,7 +100,7 @@ const SaveFileButton = () => {
 
 	return (
 		<>
-			<Button variant="outline-primary" onClick={handleBtnClick}>
+			<Button variant="outline-primary" className="btn-save-hover" onClick={handleBtnClick}>
 				Save
 			</Button>
 			<ErrorModal {...errorModal} />

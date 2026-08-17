@@ -57,3 +57,56 @@ h6 {
 .carousel-control-next-icon {
 	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E") !important;
 }
+/* Reset button - light red default, dark red on hover, dark red when open */
+.btn-reset-hover,
+.btn-reset-hover .dropdown-toggle {
+	background-color: #f8d7da !important;
+	border-color: #0d6efd !important;
+	color: #212529 !important;
+}
+.btn-reset-hover .dropdown-toggle:hover,
+.btn-reset-hover.show .dropdown-toggle,
+.btn-reset-hover .dropdown-toggle:focus {
+	background-color: #dc3545 !important;
+	border-color: #dc3545 !important;
+	color: white !important;
+}
+
+/* Export button - light yellow default, dark yellow on hover, dark yellow when open */
+.btn-export-hover,
+.btn-export-hover .dropdown-toggle {
+	background-color: #fff3cd !important;
+	border-color: #0d6efd !important;
+	color: #212529 !important;
+}
+.btn-export-hover .dropdown-toggle:hover,
+.btn-export-hover.show .dropdown-toggle,
+.btn-export-hover .dropdown-toggle:focus {
+	background-color: #ffc107 !important;
+	border-color: #ffc107 !important;
+	color: #212529 !important;
+}
+
+/* Save button - light green default, dark green on hover */
+.btn-save-hover {
+	background-color: #d1e7dd !important;
+	border-color: #0d6efd !important;
+	color: #212529 !important;
+}
+.btn-save-hover:hover {
+	background-color: #198754 !important;
+	border-color: #198754 !important;
+	color: white !important;
+}
+
+/* Reset dropdown items - light red on hover */
+.btn-reset-hover .dropdown-item:hover {
+	background-color: #f8d7da !important;
+	color: #212529 !important;
+}
+
+/* Export dropdown items - light yellow on hover */
+.btn-export-hover .dropdown-item:hover {
+	background-color: #fff3cd !important;
+	color: #212529 !important;
+}
