@@ -4,7 +4,7 @@ import DoIcon from "/img/Function.png";
 import BeIcon from "/img/Cloud.png";
 import FeelIcon from "/img/Heart.png";
 import ConcernIcon from "/img/Risk.png";
-import Nestable, {NestableProps} from "react-nestable";
+//import Nestable, {NestableProps} from "react-nestable";
 import {FaPlus, FaMinus} from "react-icons/fa";
 import {
     SimpleTreeItemWrapper,
@@ -185,12 +185,14 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
     onDeleteItem,
     ...props
 }, ref) => {
+    const isOver = (props as { isOver?: boolean }).isOver;
     const treeItem = item as SortableTreeGoal;
     const isEditing = editingItemId === treeItem.instanceId;
     const iconSize = 25;
     const isReference = existingGoalReferenceInstanceId.some(
       (itemRef) => itemRef.goalId === treeItem.id && itemRef.instanceId === treeItem.instanceId
     );
+
 
     const handleEdit = () => {
         if (isEmptyGoal(treeItem)) {
@@ -252,7 +254,8 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
           handleCancel,
         );
     };
-
+    // 在 TreeRow 的 return 之前添加
+    console.log("TreeRow rendered, isOver:", isOver, "item:", treeItem.content);
     return (
         <SimpleTreeItemWrapper
           {...props}
@@ -270,24 +273,27 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
           showDragHandle={false}
           hideCollapseButton
         >
-        <div
-          style={{
-            ...treeListStyle,
-            backgroundColor: isEditing
-              ? "#e0e0e0"
-              : isReference
-                ? "#FF474C"
-                : "white",
-            boxShadow: clone ? "0 8px 24px rgba(0, 0, 0, 0.18)" : undefined,
-            opacity: ghost ? 0.55 : 1,
-          }}
-          className="tree-list"
-          onDoubleClick={() => {
-            if (!isEditing && !isEmptyGoal(treeItem)) {
-              handleEdit();
-            }
-          }}
-        >
+            <div
+                style={{
+                    ...treeListStyle,
+                    backgroundColor: isOver  //  Becomes true when dragging over this node
+                        ? "rgba(74, 144, 217, 0.25)"  // Light blue highlight for drag-over state
+                        : isEditing
+                            ? "#e0e0e0"
+                            : isReference
+                                ? "#FF474C"
+                                : "white",
+                    boxShadow: clone ? "0 8px 24px rgba(0, 0, 0, 0.18)" : undefined,
+                    opacity: ghost ? 0.55 : 1,
+                    transition: "background-color 0.15s ease",  // Smooth background transition for better UX
+                }}
+                className="tree-list"
+                onDoubleClick={() => {
+                    if (!isEditing && !isEmptyGoal(treeItem)) {
+                        handleEdit();
+                    }
+                }}
+            >
           <div
             style={{
               display: "flex",
@@ -482,6 +488,7 @@ const Tree: React.FC<TreeProps> = ({
     ));
 
     DndTreeItem.displayName = "DndTreeItem";
+
 
     return (
         <div style={{width: "100%", height: "100%", alignSelf: "flex-start", position: "relative"}}>
