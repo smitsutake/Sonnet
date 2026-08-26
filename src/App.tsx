@@ -4,6 +4,7 @@ import Papers from "./components/Papers";
 import ProjectEdit from "./components/ProjectEdit";
 import Layout from "./components/Layout";
 import FeedbackProvider from "./components/feedback/FeedbackProvider";
+import ViewModel from "./components/ViewModel";
 
 const App = () => {
 	return (
@@ -17,6 +18,8 @@ const App = () => {
 						<Route path="/" element={<Welcome />} />
 						<Route path="/papers" element={<Papers />} />
 						<Route path="/projectEdit" element={<ProjectEdit />} />
+						<Route path="/viewModel" element={<ViewModel />} />
+
 					</Routes>
 				</Layout>
 			</FeedbackProvider>

@@ -260,8 +260,29 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						>
 							Upload
 						</Button>
+
+
+						{/* 👇 新增：View Model 按钮 */}
+						<Button
+							variant="success"
+							size="lg"
+							onClick={() => navigate("/viewModel")}
+							className="align-self-center"
+						>
+							View Model
+						</Button>
 					</div>
+
+					{/* 👇 显示教师姓名（如果是教师模式） */}
+					{reviewerName !== null && (
+						<div className="position-absolute" style={{bottom: "40px"}}>
+                <span className="text-muted small">
+                    Reviewing as {reviewerName}
+                </span>
+						</div>
+					)}
 				</>
+
 			) : (
 				<div className="d-flex flex-column align-items-center">
 					<div className="d-flex justify-content-center">
@@ -303,6 +324,15 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						onClick={() => setShowTeacherGate(true)}
 					>
 						For Teaching Staff
+					</Button>
+					{/* 新用来放model的页面*/}
+					<Button
+						variant="primary"
+						size="lg"
+						className="ms-5"
+						onClick={() => navigate("/viewModel")}
+					>
+						View Model
 					</Button>
 					{reviewerName !== null && (
 						<span className="text-muted small">

@@ -209,4 +209,19 @@ const FileProvider: React.FC<PropsWithChildren> = ({children}) => {
     );
 };
 
+
+// 添加这个函数到 FileProvider 组件中
+import {InitialTab} from "../../data/initialTabs.ts";   // 👈 加上 InitialTab
+
+export const tabsToInitialTabs = (
+    tabs: Map<Label, TabContent>,
+    goals: Record<TreeGoal["id"], TreeGoal>
+): InitialTab[] => {
+    return Array.from(tabs.values()).map((tab) => ({
+        label: tab.label,
+        icon: tab.icon,
+        rows: tab.goalIds.map((goalId) => goals[goalId]).filter(Boolean),
+    }));
+};
+
 export default FileProvider;
