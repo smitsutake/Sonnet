@@ -12,7 +12,10 @@ interface ShowGoalSectionButtonProps {
 
 type SizeAndStyle = Record<"size", ButtonProps["size"]> | Record<"style", Record<string, string>>
 
-const ShowGoalSectionButton = ({onClick, showGoalSection, className, variant="outline-primary", size}: ShowGoalSectionButtonProps) => {
+const ShowGoalSectionButton = ({onClick, showGoalSection, className, size}: ShowGoalSectionButtonProps) => {
+    // Dynamically switch variant based on visibility state
+    const variant = showGoalSection ? "secondary" : "primary";
+
     const sizeAndStyle: SizeAndStyle = (size === "xs") ? {
         size: "sm",
         style: {
