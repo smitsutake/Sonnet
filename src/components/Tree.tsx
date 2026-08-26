@@ -254,7 +254,7 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
           handleCancel,
         );
     };
-    // 在 TreeRow 的 return 之前添加
+    // Tracking changing
     console.log("TreeRow rendered, isOver:", isOver, "item:", treeItem.content);
     return (
         <SimpleTreeItemWrapper
@@ -500,6 +500,25 @@ const Tree: React.FC<TreeProps> = ({
             onConfirm={deleteItem}
           />
 
+            {/* Conditionally render empty state or the sortable tree */}
+            {treeData.length === 0 ? (
+                // Empty state: show guidance message when no goals are in the hierarchy
+                <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    height: "100%",
+                    color: "#999",
+                    textAlign: "center",
+                    padding: "20% 2rem 2rem 2rem",
+                }}>
+                    <p style={{fontSize: "18px", margin: 0}}>📂 Drag goals here to build your hierarchy</p>
+                    <p style={{fontSize: "14px", marginTop: "8px"}}>
+                        Select goals from the left panel and drag them into this area
+                    </p>
+                </div>
+            ) : (
           <SortableTree
             items={sortableItems}
             onItemsChanged={handleItemsChanged}
@@ -507,11 +526,12 @@ const Tree: React.FC<TreeProps> = ({
             indentationWidth={INDENTATION_WIDTH}
             disableSorting={editingItemId !== null}
             pointerSensorOptions={{
-              activationConstraint: {
-                distance: 5,
-              },
+                activationConstraint: {
+                    distance: 5,
+                },
             }}
-          />
+            />
+            )}
         </div>
     );
 };
