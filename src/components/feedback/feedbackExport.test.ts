@@ -96,6 +96,44 @@ describe("buildAnnotationLayout", () => {
 		expect(layout.markup.match(/ C /g)).toHaveLength(2);
 	});
 
+	it("draws the arrows dashed, matching the on-screen overlay", () => {
+		const layout = buildAnnotationLayout(
+			[annotation("fb-1", "#1c5a92", [rect(100, 100)])],
+			500,
+			10
+		);
+		expect(layout.markup).toContain("stroke-dasharray");
+	});
+
+	it("routes exported arrows around the other shapes", () => {
+		// The exported image has to match what the reviewer saw, so it uses the
+		// same detour logic rather than drawing straight through labels.
+		const straight = buildAnnotationLayout(
+			[{item: item("fb-1", "check this"), colour: "#1c5a92", targetRects: [rect(100, 300)]}],
+			500,
+			10
+		);
+		const detoured = buildAnnotationLayout(
+			[
+				{
+					item: item("fb-1", "check this"),
+					colour: "#1c5a92",
+					targetRects: [rect(100, 300)],
+					// Positioned on the straight line between the comment box and
+					// its target, so the router has something real to avoid.
+					obstacles: [
+						{left: 300, top: 170, right: 420, width: 120, height: 60},
+					],
+				},
+			],
+			500,
+			10
+		);
+		expect(detoured.markup).not.toBe(straight.markup);
+		// A detour renders as a rounded corner rather than one smooth curve.
+		expect(detoured.markup).toContain("Q ");
+	});
+
 	it("emits an arrowhead marker for each colour used", () => {
 		const layout = buildAnnotationLayout(
 			[

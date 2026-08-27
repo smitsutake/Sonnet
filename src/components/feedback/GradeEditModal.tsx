@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
+import NumberField from "./NumberField.tsx";
 import {
 	createEmptyGrade,
 	createGradeCriterion,
@@ -27,12 +28,6 @@ type GradeEditModalProps = {
 	existingGrade: GradeData | null;
 	onCancel: () => void;
 	onSave: (grade: GradeData) => void;
-};
-
-// Empty input should mean zero, not NaN, which would end up in the file.
-const toNumber = (value: string): number => {
-	const parsed = Number(value);
-	return Number.isFinite(parsed) ? parsed : 0;
 };
 
 const GradeEditModal: React.FC<GradeEditModalProps> = ({
@@ -93,22 +88,18 @@ const GradeEditModal: React.FC<GradeEditModalProps> = ({
 				<Form.Group className="mb-4">
 					<Form.Label className="fw-semibold">Total score</Form.Label>
 					<div className="d-flex align-items-center gap-2">
-						<Form.Control
-							type="number"
+						<NumberField
 							style={{maxWidth: "8rem"}}
+							ariaLabel="Total score"
 							value={draft.totalScore}
-							onChange={(event) =>
-								setDraft({...draft, totalScore: toNumber(event.target.value)})
-							}
+							onChange={(next) => setDraft({...draft, totalScore: next})}
 						/>
 						<span className="text-muted">out of</span>
-						<Form.Control
-							type="number"
+						<NumberField
 							style={{maxWidth: "8rem"}}
+							ariaLabel="Total out of"
 							value={draft.totalOutOf}
-							onChange={(event) =>
-								setDraft({...draft, totalOutOf: toNumber(event.target.value)})
-							}
+							onChange={(next) => setDraft({...draft, totalOutOf: next})}
 						/>
 					</div>
 				</Form.Group>
@@ -162,24 +153,20 @@ const GradeEditModal: React.FC<GradeEditModalProps> = ({
 											/>
 										</td>
 										<td>
-											<Form.Control
-												type="number"
+											<NumberField
+												ariaLabel="Component score"
 												value={criterion.score}
-												onChange={(event) =>
-													updateCriterion(criterion.id, {
-														score: toNumber(event.target.value),
-													})
+												onChange={(next) =>
+													updateCriterion(criterion.id, {score: next})
 												}
 											/>
 										</td>
 										<td>
-											<Form.Control
-												type="number"
+											<NumberField
+												ariaLabel="Component out of"
 												value={criterion.outOf}
-												onChange={(event) =>
-													updateCriterion(criterion.id, {
-														outOf: toNumber(event.target.value),
-													})
+												onChange={(next) =>
+													updateCriterion(criterion.id, {outOf: next})
 												}
 											/>
 										</td>

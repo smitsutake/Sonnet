@@ -1,12 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
 import {InstanceId} from "../types.ts";
 import {useGraph} from "../context/GraphContext.tsx";
-import {graphRectForInstanceId} from "./graphAnchors.ts";
+import {goalRectsExcept, graphRectForInstanceId} from "./graphAnchors.ts";
+import {routeArrow, routeToPath} from "./arrowRouting.ts";
 import {FeedbackItem} from "./feedbackTypes.ts";
 import {buildColourMap} from "./feedbackColours.ts";
 import {
+	ARROW_DASH_PATTERN,
+	ARROW_STROKE_WIDTH,
 	ArrowLine,
-	buildArrowPath,
 	computeArrowLines,
 	FEEDBACK_ANCHOR_ATTRIBUTE,
 	GOAL_ANCHOR_ATTRIBUTE,
@@ -75,6 +77,20 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 	const {graph} = useGraph();
 	const colourMap = buildColourMap(items.map((item) => item.id));
 
+	// Obstacle rectangles are measured in page coordinates, the same as the
+	// arrow endpoints, then shifted into the overlay's space below.
+	const [containerOrigin, setContainerOrigin] = useState({x: 0, y: 0});
+	const obstaclesRef = useRef<Record<string, RectLike[]>>({});
+
+	const obstaclesFor = (instanceId: InstanceId): RectLike[] =>
+		(obstaclesRef.current[instanceId] ?? []).map((rect) => ({
+			left: rect.left - containerOrigin.x,
+			top: rect.top - containerOrigin.y,
+			right: rect.right - containerOrigin.x,
+			width: rect.width,
+			height: rect.height,
+		}));
+
 	// A goal is drawn in two places. The rendered model is the one reviewers
 	// actually look at, so it wins; the hierarchy row is the fallback for when
 	// the canvas is hidden or the shape has been scrolled away.
@@ -99,6 +115,18 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 						?? rectOf(GOAL_ANCHOR_ATTRIBUTE, instanceId),
 					selectedItemId,
 					(itemId) => colourMap[itemId] ?? "#1c5a92"
+				);
+				const rect = container.getBoundingClientRect();
+				setContainerOrigin((previous) =>
+					previous.x === rect.left && previous.y === rect.top
+						? previous
+						: {x: rect.left, y: rect.top}
+				);
+				obstaclesRef.current = Object.fromEntries(
+					next.map((line) => [
+						line.instanceId,
+						goalRectsExcept(graphRef.current, line.instanceId),
+					])
 				);
 				setLines((previous) =>
 					// Skip the state update, and so the re-render, on frames where
@@ -169,10 +197,18 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 			{lines.map((line) => (
 				<path
 					key={line.key}
-					d={buildArrowPath(line)}
+					d={routeToPath(
+						routeArrow(
+							{x: line.fromX, y: line.fromY},
+							{x: line.toX, y: line.toY},
+							obstaclesFor(line.instanceId)
+						)
+					)}
 					fill="none"
 					stroke={line.colour}
-					strokeWidth={2}
+					strokeWidth={ARROW_STROKE_WIDTH}
+					strokeDasharray={ARROW_DASH_PATTERN}
+					strokeLinecap="round"
 					markerEnd={`url(#${arrowheadId(line.colour)})`}
 				/>
 			))}

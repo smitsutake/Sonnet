@@ -156,3 +156,39 @@ export const graphRectForInstanceId = (
 		height: state.height,
 	};
 };
+
+// Rectangles of every goal shape currently drawn, in page coordinates.
+//
+// Used as obstacles when routing feedback arrows, so a line does not end up
+// lying across another goal's label. The arrow's own target is excluded --
+// the arrow has to be able to reach it.
+export const goalRectsExcept = (
+	graph: Graph | null,
+	exclude: InstanceId
+): RectLike[] => {
+	if (!graph) {
+		return [];
+	}
+
+	const seen = new Set<string>();
+	const rects: RectLike[] = [];
+
+	allCells(graph).forEach((cell) => {
+		const ids = instanceIdsFromCellId(cell.getId());
+		if (ids.length === 0 || ids.includes(exclude)) {
+			return;
+		}
+		const id = cell.getId();
+		if (!id || seen.has(id)) {
+			return;
+		}
+		seen.add(id);
+
+		const rect = graphRectForInstanceId(graph, ids[0]);
+		if (rect) {
+			rects.push(rect);
+		}
+	});
+
+	return rects;
+};

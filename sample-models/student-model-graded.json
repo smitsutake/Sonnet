@@ -1,0 +1,145 @@
+{
+  "tabData": [
+    {
+      "label": "Do",
+      "icon": "/img/Function.png",
+      "goalIds": [
+        101,
+        102,
+        103
+      ]
+    },
+    {
+      "label": "Be",
+      "icon": "/img/Cloud.png",
+      "goalIds": [
+        201
+      ]
+    },
+    {
+      "label": "Feel",
+      "icon": "/img/Heart.png",
+      "goalIds": [
+        301
+      ]
+    },
+    {
+      "label": "Concern",
+      "icon": "/img/Risk.png",
+      "goalIds": [
+        401
+      ]
+    },
+    {
+      "label": "Who",
+      "icon": "/img/Stakeholder.png",
+      "goalIds": [
+        501
+      ]
+    }
+  ],
+  "treeData": [
+    {
+      "id": 101,
+      "content": "Record attendance",
+      "type": "Do",
+      "instanceId": "101-1",
+      "children": [
+        {
+          "id": 102,
+          "content": "Scan student card",
+          "type": "Do",
+          "instanceId": "102-1",
+          "children": []
+        },
+        {
+          "id": 103,
+          "content": "Generate weekly report",
+          "type": "Do",
+          "instanceId": "103-1",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": 201,
+      "content": "Reliable",
+      "type": "Be",
+      "instanceId": "201-1",
+      "children": []
+    },
+    {
+      "id": 301,
+      "content": "Confident",
+      "type": "Feel",
+      "instanceId": "301-1",
+      "children": []
+    },
+    {
+      "id": 401,
+      "content": "Losing attendance data",
+      "type": "Concern",
+      "instanceId": "401-1",
+      "children": []
+    },
+    {
+      "id": 501,
+      "content": "Coach",
+      "type": "Who",
+      "instanceId": "501-1",
+      "children": []
+    }
+  ],
+  "feedback": {
+    "status": "feedbacked",
+    "items": [
+      {
+        "id": "fb-sample-1",
+        "content": "\"Record attendance\" is doing two jobs here. Consider splitting the capture step from the reporting step.",
+        "author": "Leon Sterling",
+        "createdAt": "2026-08-01T02:15:00.000Z",
+        "targets": [
+          "101-1",
+          "103-1"
+        ]
+      },
+      {
+        "id": "fb-sample-2",
+        "content": "Good use of a Concern here. Check whether it should sit under the Coach stakeholder.",
+        "author": "Leon Sterling",
+        "createdAt": "2026-08-01T02:19:00.000Z",
+        "targets": [
+          "401-1"
+        ]
+      }
+    ],
+    "updatedAt": "2026-08-01T02:19:00.000Z",
+    "grade": {
+      "totalScore": 17,
+      "totalOutOf": 20,
+      "criteria": [
+        {
+          "id": "crit-1",
+          "label": "Hierarchy structure",
+          "score": 8,
+          "outOf": 10
+        },
+        {
+          "id": "crit-2",
+          "label": "Use of quality and emotional goals",
+          "score": 6,
+          "outOf": 7
+        },
+        {
+          "id": "crit-3",
+          "label": "Stakeholder coverage",
+          "score": 3,
+          "outOf": 3
+        }
+      ],
+      "overallFeedback": "A solid model overall. The functional hierarchy is clear and the stakeholder is well placed. Split the top-level goal so that capture and reporting are separate, and check whether the Concern belongs under the Coach rather than at the top level.",
+      "gradedBy": "Leon Sterling",
+      "gradedAt": "2026-08-13T02:30:00.000Z"
+    }
+  }
+}

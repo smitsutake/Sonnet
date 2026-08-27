@@ -2,6 +2,8 @@ import {describe, expect, it} from "vitest";
 import {InstanceId} from "../types";
 import {FeedbackItem} from "./feedbackTypes";
 import {
+	ARROW_DASH_PATTERN,
+	ARROW_STROKE_WIDTH,
 	buildArrowPath,
 	computeArrowLines,
 	RectLike,
@@ -236,3 +238,18 @@ describe("buildArrowPath", () => {
 		expect(rightward2).toBeGreaterThanOrEqual(300);
 		expect(rightward2).toBeLessThanOrEqual(700);
 	});});
+
+describe("arrow stroke style", () => {
+	it("uses a dash long enough not to be mistaken for the model's own edges", () => {
+		// The model draws its association edges with dashPattern "3 3". Feedback
+		// arrows have to read as a third kind of line, so the dash and the gap
+		// are both meaningfully longer.
+		const [dash, gap] = ARROW_DASH_PATTERN.split(" ").map(Number);
+		expect(dash).toBeGreaterThan(3);
+		expect(gap).toBeGreaterThan(3);
+	});
+
+	it("stays thin enough that overlapping arrows remain readable", () => {
+		expect(ARROW_STROKE_WIDTH).toBeLessThan(2.5);
+	});
+});

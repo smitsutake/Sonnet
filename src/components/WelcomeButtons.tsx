@@ -8,7 +8,6 @@ import FileUploadSection from "./FileUploadSection";
 import {JSONData, useFileContext} from "./context/FileProvider";
 import {reset} from "./context/treeDataSlice.ts";
 import {TabContent, TreeGoal} from "./types.ts";
-import TeacherGateModal from "./feedback/TeacherGateModal";
 import {useFeedbackContext} from "./feedback/feedbackContext";
 import {parseFeedbackData} from "./feedback/feedbackTypes";
 
@@ -61,24 +60,13 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	const navigate = useNavigate();
 
 	const {dispatch} = useFileContext();
-	const {loadItems, startReviewSession, endReviewSession, reviewerName} =
-		useFeedbackContext();
-
-	const [showTeacherGate, setShowTeacherGate] = useState(false);
+	const {loadItems, reviewerName} = useFeedbackContext();
 
 	// Pulls the feedback block off a freshly parsed file and hands it to the
 	// feedback session. Called for every open, not just teaching-staff opens,
 	// so that a student opening a reviewed file sees the comments too.
 	const loadFeedbackFromFile = (data: JSONData) => {
 		loadItems(parseFeedbackData(data.feedback));
-	};
-
-	const handleTeacherConfirmed = (name: string) => {
-		startReviewSession(name);
-		setShowTeacherGate(false);
-		// Reviewers always arrive by opening an existing student file, so drop
-		// straight into the same open-file UI the Open Model button uses.
-		setIsDragging(true);
 	};
 
 	// Handle Create Model button click - load default data
@@ -206,11 +194,6 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 			{/* Error Modal while user upload wrong types or invalid files */}
 			<ErrorModal {...errorModal} />
 
-			<TeacherGateModal
-				show={showTeacherGate}
-				onCancel={() => setShowTeacherGate(false)}
-				onConfirm={handleTeacherConfirmed}
-			/>
 
 			{/* File Input */}
 			<input
@@ -282,32 +265,25 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						<Button
 							variant="primary"
 							size="lg"
-							onClick={() => {
-								// Leaving review mode here keeps the two entry points
-								// distinct: Open Model is always a plain open.
-								endReviewSession();
-								setIsDragging(true);
-							}}
+							onClick={() => setIsDragging(true)}
 							className="align-self-start ms-5"
 						>
 							Open Model
 						</Button>
 					</div>
 
-					{/* Teaching staff entry point. Sits below the two primary actions
-					    and is styled as a link so it does not compete with them. */}
-					<Button
-						variant="link"
-						size="sm"
-						className="mt-3"
-						onClick={() => setShowTeacherGate(true)}
-					>
-						For Teaching Staff
-					</Button>
+					{/* Only in staff mode. Create and Open are unchanged; this is
+					    the one extra thing staff can do, so it sits under them
+					    rather than replacing anything. */}
 					{reviewerName !== null && (
-						<span className="text-muted small">
-							Reviewing as {reviewerName}
-						</span>
+						<Button
+							variant="primary"
+							size="lg"
+							className="mt-4"
+							onClick={() => setIsDragging(true)}
+						>
+							Mark model
+						</Button>
 					)}
 				</div>
 			)}

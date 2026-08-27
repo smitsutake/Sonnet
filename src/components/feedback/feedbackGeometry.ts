@@ -118,3 +118,13 @@ export const targetsOfItem = (
 	const item = items.find((candidate) => candidate.id === itemId);
 	return item ? item.targets : [];
 };
+
+// Dash pattern for feedback arrows.
+//
+// Solid lines were hard to tell apart from the model's own connectors, which
+// are solid for parent-child links and dashed for the associations around a
+// functional goal. A long dash with a wide gap reads as a third kind of line
+// rather than as either of those, and stays legible when several arrows
+// converge on the same shape.
+export const ARROW_DASH_PATTERN = "7 5";
+export const ARROW_STROKE_WIDTH = 1.8;

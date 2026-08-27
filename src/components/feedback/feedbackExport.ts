@@ -4,7 +4,12 @@ import {
 	GradeData,
 	gradePercentage,
 } from "./feedbackTypes.ts";
-import {RectLike} from "./feedbackGeometry.ts";
+import {
+	ARROW_DASH_PATTERN,
+	ARROW_STROKE_WIDTH,
+	RectLike,
+} from "./feedbackGeometry.ts";
+import {routeArrow, routeToPath} from "./arrowRouting.ts";
 import {InstanceId} from "../types.ts";
 
 // ============================================================
@@ -62,6 +67,9 @@ export type ExportAnnotation = {
 	colour: string;
 	// Where each linked goal sits in the exported drawing.
 	targetRects: RectLike[];
+	// Every other goal shape, so the exported arrows detour around labels the
+	// same way the on-screen ones do. Absent means "route straight".
+	obstacles?: RectLike[];
 };
 
 export type AnnotationLayout = {
@@ -91,7 +99,7 @@ export const buildAnnotationLayout = (
 	const parts: string[] = [];
 	let cursorY = drawingTop;
 
-	annotations.forEach(({item, colour, targetRects}) => {
+	annotations.forEach(({item, colour, targetRects, obstacles}) => {
 		const heading = `${item.author} — ${formatFeedbackDate(item.createdAt)}`;
 		const bodyLines = wrapText(item.content, 34);
 		const boxHeight =
@@ -130,14 +138,17 @@ export const buildAnnotationLayout = (
 		targetRects.forEach((target, index) => {
 			const toX = target.right;
 			const toY = target.top + target.height / 2;
-			// Signed, for the same reason as the on-screen arrows: an absolute
-			// offset loops the curve when the target is to the right.
-			const offset = (toX - fromX) / 2;
-			const minimumBend = toX === fromX ? 30 : 0;
+			// Routed around the other shapes, so the exported image matches what
+			// the reviewer saw on screen.
+			const route = routeArrow(
+				{x: fromX, y: fromY},
+				{x: toX, y: toY},
+				obstacles ?? []
+			);
 			parts.push(
-				`<path d="M ${fromX} ${fromY} C ${fromX + offset + minimumBend} ${fromY}, `
-				+ `${toX - offset - minimumBend} ${toY}, ${toX} ${toY}" fill="none" `
-				+ `stroke="${colour}" stroke-width="1.5" `
+				`<path d="${routeToPath(route)}" fill="none" `
+				+ `stroke="${colour}" stroke-width="${ARROW_STROKE_WIDTH}" `
+				+ `stroke-dasharray="${ARROW_DASH_PATTERN}" stroke-linecap="round" `
 				+ `marker-end="url(#feedback-export-head-${index === 0 ? colour.replace("#", "") : colour.replace("#", "")})"/>`
 			);
 		});
@@ -168,7 +179,8 @@ export const buildAnnotationLayout = (
 export const collectAnnotations = (
 	items: FeedbackItem[],
 	colourFor: (itemId: string) => string,
-	rectFor: (instanceId: InstanceId) => RectLike | null
+	rectFor: (instanceId: InstanceId) => RectLike | null,
+	obstaclesFor?: (item: FeedbackItem) => RectLike[]
 ): ExportAnnotation[] =>
 	items.map((item) => ({
 		item,
@@ -176,6 +188,7 @@ export const collectAnnotations = (
 		targetRects: item.targets
 			.map(rectFor)
 			.filter((rect): rect is RectLike => rect !== null),
+		obstacles: obstaclesFor ? obstaclesFor(item) : [],
 	}));
 
 // ============================================================

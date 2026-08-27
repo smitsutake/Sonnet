@@ -15,7 +15,7 @@ import {useFeedbackContext} from "../feedback/feedbackContext";
 import {buildColourMap} from "../feedback/feedbackColours";
 import {hasGrade} from "../feedback/feedbackTypes";
 import {buildAnnotationLayout, buildGradeBanner, collectAnnotations} from "../feedback/feedbackExport";
-import {graphRectForInstanceId} from "../feedback/graphAnchors";
+import {goalRectsExcept, graphRectForInstanceId} from "../feedback/graphAnchors";
 
 const PNG_EXPORT_SCALE = 3;
 
@@ -71,7 +71,14 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
             (instanceId) => {
                 const rect = graphRectForInstanceId(graphInstance, instanceId);
                 return rect ? toSvgSpace(rect) : null;
-            }
+            },
+            // Obstacles for routing. Only the first target's exclusions are
+            // needed, because a comment's arrows all leave from one box and
+            // each is routed independently against the same set of shapes.
+            (item) =>
+                item.targets.length === 0
+                    ? []
+                    : goalRectsExcept(graphInstance, item.targets[0]).map(toSvgSpace)
         );
 
         const width = Number(clone.getAttribute("width")) || container.clientWidth;
