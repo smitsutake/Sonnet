@@ -10,6 +10,7 @@ import {isChrome, isEdge, isOpera} from "react-device-detect";
 import ResetGraphButton from "../Graphs/ResetGraphButton.tsx";
 
 import HomeButton from "./HomeButton.tsx";
+import VersionHistoryButton from "../model-version-control/VersionHistoryButton.tsx";
 import {GradeEditButton, GradeViewButton} from "../feedback/GradeButtons.tsx";
 
 type ProjectEditHeaderProps = {
@@ -44,6 +45,7 @@ const ProjectEditHeader: React.FC<ProjectEditHeaderProps> = ({
                         {/* Visible to anyone opening a graded model, so it sits
                             beside Export where a student will be looking. */}
                         <GradeViewButton/>
+                        <VersionHistoryButton/>
                         <ButtonGroup>
                             {/* Pass showGraphSection to ExportFileButton to control enablement */}
                             <ExportFileButton showGraphSection={showGraphSection}/>
