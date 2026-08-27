@@ -7,6 +7,7 @@ import GradeViewModal from "./feedback/GradeViewModal";
 import {useFeedbackContext} from "./feedback/feedbackContext";
 import ProgressBar from "./ProgressBar";
 import {GraphProvider} from "./context/GraphContext";
+import VersionHistoryProvider from "./model-version-control/VersionHistoryProvider";
 
 const ProjectEdit: React.FC = () => {
     const {grade, isGradeVisible, setGradeVisible} = useFeedbackContext();
@@ -15,6 +16,7 @@ const ProjectEdit: React.FC = () => {
 
     return (
         <GraphProvider>
+          <VersionHistoryProvider>
             <ProjectEditHeader showGoalSection={showGoalSection}
                                setShowGoalSection={setShowGoalSection}
                                showGraphSection={showGraphSection}/>
@@ -30,6 +32,7 @@ const ProjectEdit: React.FC = () => {
             <GradeViewModal show={isGradeVisible}
                             grade={grade}
                             onClose={() => setGradeVisible(false)}/>
+          </VersionHistoryProvider>
         </GraphProvider>
     );
 };
