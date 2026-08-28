@@ -4,7 +4,7 @@ import {useGraph} from "../context/GraphContext.tsx";
 import {goalRectsExcept, graphRectForInstanceId} from "./graphAnchors.ts";
 import {routeArrow, routeToPath} from "./arrowRouting.ts";
 import {FeedbackItem} from "./feedbackTypes.ts";
-import {buildColourMap} from "./feedbackColours.ts";
+import {FEEDBACK_COLOUR} from "./feedbackColours.ts";
 import {
 	ARROW_DASH_PATTERN,
 	ARROW_STROKE_WIDTH,
@@ -75,7 +75,6 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 	const [lines, setLines] = useState<ArrowLine[]>([]);
 	const frameRef = useRef<number>();
 	const {graph} = useGraph();
-	const colourMap = buildColourMap(items.map((item) => item.id));
 
 	// Obstacle rectangles are measured in page coordinates, the same as the
 	// arrow endpoints, then shifted into the overlay's space below.
@@ -114,7 +113,7 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 						graphRectForInstanceId(graphRef.current, instanceId)
 						?? rectOf(GOAL_ANCHOR_ATTRIBUTE, instanceId),
 					selectedItemId,
-					(itemId) => colourMap[itemId] ?? "#1c5a92"
+					() => FEEDBACK_COLOUR
 				);
 				const rect = container.getBoundingClientRect();
 				setContainerOrigin((previous) =>
@@ -145,7 +144,7 @@ const FeedbackArrows: React.FC<FeedbackArrowsProps> = ({
 				cancelAnimationFrame(frameRef.current);
 			}
 		};
-	}, [items, containerRef, selectedItemId, colourMap]);
+	}, [items, containerRef, selectedItemId]);
 
 	// Marks the goal rows a selected comment points at, so the link reads in
 	// both directions. Done from here rather than inside Tree so that the tree

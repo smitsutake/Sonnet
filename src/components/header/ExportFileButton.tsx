@@ -12,7 +12,7 @@ import {returnFocusToGraph} from "../utils/GraphUtils";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import {useFeedbackContext} from "../feedback/feedbackContext";
-import {buildColourMap} from "../feedback/feedbackColours";
+import {FEEDBACK_COLOUR} from "../feedback/feedbackColours";
 import {hasGrade} from "../feedback/feedbackTypes";
 import {buildAnnotationLayout, buildGradeBanner, collectAnnotations} from "../feedback/feedbackExport";
 import {goalRectsExcept, graphRectForInstanceId} from "../feedback/graphAnchors";
@@ -64,10 +64,9 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
             height: rect.height,
         });
 
-        const colourMap = buildColourMap(feedbackItems.map((item) => item.id));
         const annotations = collectAnnotations(
             feedbackItems,
-            (itemId) => colourMap[itemId] ?? "#1c5a92",
+            () => FEEDBACK_COLOUR,
             (instanceId) => {
                 const rect = graphRectForInstanceId(graphInstance, instanceId);
                 return rect ? toSvgSpace(rect) : null;

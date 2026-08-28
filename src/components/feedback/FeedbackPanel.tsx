@@ -5,7 +5,7 @@ import {InstanceId, TreeGoal} from "../types.ts";
 import {useFileContext} from "../context/FileProvider.tsx";
 import {useGraph} from "../context/GraphContext.tsx";
 import {GRAPH_CLICK_EVENT, primaryInstanceIdOfCell} from "./graphAnchors.ts";
-import {buildColourMap, MAX_FEEDBACK_ITEMS} from "./feedbackColours.ts";
+import {FEEDBACK_COLOUR, MAX_FEEDBACK_ITEMS} from "./feedbackColours.ts";
 import {useFeedbackContext} from "./feedbackContext.ts";
 import {formatFeedbackDate} from "./feedbackTypes.ts";
 import "./FeedbackPanel.css";
@@ -54,9 +54,6 @@ const FeedbackPanel: React.FC = () => {
 	} = useFeedbackContext();
 
 	const isEditable = reviewerName !== null;
-	// Colour is derived from position rather than stored, so the saved file
-	// format is unchanged and deleting a comment leaves no gap in the palette.
-	const colourMap = buildColourMap(items.map((item) => item.id));
 	const atItemLimit = items.length >= MAX_FEEDBACK_ITEMS;
 	const goalLabels = collectGoalLabels(treeData ?? [], new Map());
 
@@ -184,7 +181,7 @@ const FeedbackPanel: React.FC = () => {
 				{items.map((item) => {
 					const isLinking = linkingItemId === item.id;
 					const isSelected = selectedItemId === item.id;
-					const colour = colourMap[item.id];
+					const colour = FEEDBACK_COLOUR;
 					return (
 						<div
 							key={item.id}
