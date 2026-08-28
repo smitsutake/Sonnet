@@ -25,6 +25,7 @@ import {registerCustomShapes} from "./GraphShapes";
 import "./GraphWorker.css";
 import {useFileContext} from "../context/FileProvider.tsx";
 import {useGraph} from "../context/GraphContext";
+import {useFeedbackContext} from "../feedback/feedbackContext.ts";
 import {Cluster, GlobObject, InstanceId} from "../types.ts";
 import GraphSidebar from "./GraphSidebar";
 import WarningMessage from "./WarningMessage";
@@ -58,6 +59,12 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     const divGraph = useRef<HTMLDivElement>(null);
     const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals} = useFileContext();
     const {graph, setGraph} = useGraph();
+    // The feedback panel appears for a reviewer writing comments, and also for
+    // anyone opening a file that already carries feedback (see the matching
+    // showFeedbackSection check in SectionPanel). Neither of them is editing
+    // the model, so the shape palette and styling tools have no use either way.
+    const {reviewerName, fileHadFeedback} = useFeedbackContext();
+    const isReviewing = reviewerName !== null || fileHadFeedback;
     const treeIdsRef = useRef(treeIds);
     treeIdsRef.current = treeIds;
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.
@@ -690,12 +697,15 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             <Container>
                 {/* The sidebar sits to the left of the canvas so that feedback
                     arrows, which run from the panel on the far right to shapes
-                    on the canvas, do not have to cross it. */}
+                    on the canvas, do not have to cross it. Hidden entirely while
+                    reviewing: a reviewer only reads and comments on the model. */}
                 <Row className="row">
-                    <Col md={2}>
-                        <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
-                    </Col>
-                    <Col md={10}>
+                    {!isReviewing && (
+                        <Col md={2}>
+                            <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
+                        </Col>
+                    )}
+                    <Col md={isReviewing ? 12 : 10}>
                         <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
                     </Col>
                 </Row>

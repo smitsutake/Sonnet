@@ -212,26 +212,37 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
       const newParentWidth = parentRef.current.clientWidth - paddingX * 2;
       setParentWidth(newParentWidth);
 
+      // The hierarchy tree column is dropped entirely while the feedback
+      // panel is showing (see below), so the render section can claim the
+      // width that column would otherwise have used.
+      const remainingWidth = showFeedbackSection
+        ? newParentWidth - FEEDBACK_PANEL_WIDTH
+        : newParentWidth;
+
       if (showGoalSection && showGraphSection) {
         setSectionOneWidth(
           newParentWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionOne
         );
         setSectionThreeWidth(
-          newParentWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionThree
+          remainingWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionThree
         );
-      } 
+      }
       else if (showGoalSection) {
         setSectionOneWidth(newParentWidth * INITIAL_PROPORTIONS.sectionOne);
-      } 
+      }
       else if (showGraphSection) {
-        setSectionThreeWidth(newParentWidth * INITIAL_PROPORTIONS.sectionThree);
-      } 
+        setSectionThreeWidth(
+          showFeedbackSection
+            ? remainingWidth
+            : newParentWidth * INITIAL_PROPORTIONS.sectionThree
+        );
+      }
       else {
         setSectionOneWidth(newParentWidth * INITIAL_PROPORTIONS.sectionOne);
-        setSectionThreeWidth(newParentWidth * INITIAL_PROPORTIONS.sectionThree);
+        setSectionThreeWidth(remainingWidth * INITIAL_PROPORTIONS.sectionThree);
       }
     }
-  }, [paddingX, showGoalSection, showGraphSection]); 
+  }, [paddingX, showGoalSection, showGraphSection, showFeedbackSection]);
 
   return (
     <div
@@ -282,32 +293,37 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         />
       </Resizable>
 
-      {/* Cluster Hierarchy Section */}
-      <div
-        style={{
-          ...defaultStyle,
-          width: "100%",
-          minWidth: DEFINED_PROPORTIONS.minWidth,
-          minHeight: DEFAULT_HEIGHT,
-          height: DEFAULT_HEIGHT,
-          padding: "10px",
-          backgroundColor: "rgba(35, 144, 231, 0.1)",
-          overflow: "auto",
-        }}
-        onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}
-        ref={sectionTwoRef}
-      >
-        <Tree
+      {/* Cluster Hierarchy Section. Dropped entirely once the feedback panel
+          is showing: it is a drag-to-rearrange tool for building the model,
+          and a reviewer or a student reading feedback is never doing that --
+          the rendered model on the right already shows the same hierarchy. */}
+      {!showFeedbackSection && (
+        <div
+          style={{
+            ...defaultStyle,
+            width: "100%",
+            minWidth: DEFINED_PROPORTIONS.minWidth,
+            minHeight: DEFAULT_HEIGHT,
+            height: DEFAULT_HEIGHT,
+            padding: "10px",
+            backgroundColor: "rgba(35, 144, 231, 0.1)",
+            overflow: "auto",
+          }}
+          onDrop={handleDrop}
+          onDragOver={(event) => event.preventDefault()}
+          ref={sectionTwoRef}
+        >
+          <Tree
 
-          // existingItemIds={existingItemIds}
-          // setTreeIds={setTreeIds}
-          handleSynTableTree={handleSynTableTree}
-          // setExistingItemIds={setExistingItemIds}
-          existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
-          setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
-        />
-      </div>
+            // existingItemIds={existingItemIds}
+            // setTreeIds={setTreeIds}
+            handleSynTableTree={handleSynTableTree}
+            // setExistingItemIds={setExistingItemIds}
+            existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
+            setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
+          />
+        </div>
+      )}
 
       {/* Graph Render Section */}
       <Resizable
