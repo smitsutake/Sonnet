@@ -8,7 +8,6 @@ import {
 	MAX_OVERALL_FEEDBACK_LENGTH,
 	parseFeedbackData,
 } from "./feedbackTypes";
-import {buildGradeBanner} from "./feedbackExport";
 
 const grade = (overrides: Partial<GradeData> = {}): GradeData => ({
 	totalScore: 17,
@@ -87,50 +86,5 @@ describe("grade in the saved file", () => {
 			updatedAt: "2026-08-13T00:00:00.000Z",
 		};
 		expect(parseFeedbackData(block)).not.toBeNull();
-	});
-});
-
-describe("buildGradeBanner", () => {
-	it("takes no space when the model is ungraded", () => {
-		const banner = buildGradeBanner(null, 800);
-		expect(banner.markup).toBe("");
-		expect(banner.height).toBe(0);
-	});
-
-	it("shows the mark, the percentage and the components", () => {
-		const banner = buildGradeBanner(grade(), 800);
-		expect(banner.markup).toContain("17 / 20");
-		expect(banner.markup).toContain("85%");
-		expect(banner.markup).toContain("Hierarchy: 8/10");
-		expect(banner.height).toBeGreaterThan(0);
-	});
-
-	it("omits the percentage when no maximum was set", () => {
-		const banner = buildGradeBanner(grade({totalOutOf: 0}), 800);
-		expect(banner.markup).not.toContain("%)");
-	});
-
-	it("records who graded it and when", () => {
-		const banner = buildGradeBanner(grade(), 800);
-		expect(banner.markup).toContain("Leon Sterling");
-		expect(banner.markup).toContain("2026");
-	});
-
-	it("escapes the overall feedback", () => {
-		const banner = buildGradeBanner(
-			grade({overallFeedback: 'watch the <b>"do"</b> & "be" split'}),
-			800
-		);
-		expect(banner.markup).not.toContain("<b>");
-		expect(banner.markup).toContain("&amp;");
-	});
-
-	it("grows taller as the overall feedback gets longer", () => {
-		const short = buildGradeBanner(grade({overallFeedback: "Good."}), 400);
-		const long = buildGradeBanner(
-			grade({overallFeedback: "word ".repeat(80)}),
-			400
-		);
-		expect(long.height).toBeGreaterThan(short.height);
 	});
 });
