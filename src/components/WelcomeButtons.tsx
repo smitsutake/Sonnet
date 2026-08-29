@@ -246,40 +246,35 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 					</div>
 				</>
 			) : (
-				<div className="d-flex flex-column align-items-center">
-					<div className="d-flex justify-content-center">
-						{/* Link section is bigger than Button section, click outside Button could trigger navigation,
+				<div className="d-flex justify-content-center gap-5">
+					{/* Link section is bigger than Button section, click outside Button could trigger navigation,
              hard code a static height for temporary, need a better solution
           */}
-						<Button
-							variant="primary"
-							size="lg"
-							className="me-5"
-							onClick={() => {
-								handleCreateModel();
-								navigate("/projectEdit");
-							}}
-						>
-							Create Model
-						</Button>
-						<Button
-							variant="primary"
-							size="lg"
-							onClick={() => setIsDragging(true)}
-							className="align-self-start ms-5"
-						>
-							Open Model
-						</Button>
-					</div>
+					<Button
+						variant="primary"
+						size="lg"
+						onClick={() => {
+							handleCreateModel();
+							navigate("/projectEdit");
+						}}
+					>
+						Create Model
+					</Button>
+					<Button
+						variant="primary"
+						size="lg"
+						onClick={() => setIsDragging(true)}
+					>
+						Open Model
+					</Button>
 
 					{/* Only in staff mode. Create and Open are unchanged; this is
-					    the one extra thing staff can do, so it sits under them
+					    the one extra thing staff can do, so it sits alongside them
 					    rather than replacing anything. */}
 					{reviewerName !== null && (
 						<Button
 							variant="primary"
 							size="lg"
-							className="mt-4"
 							onClick={() => setIsDragging(true)}
 						>
 							Mark model
