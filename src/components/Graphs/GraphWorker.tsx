@@ -63,6 +63,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     treeIdsRef.current = treeIds;
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.
     const isRenderingRef = useRef(false);
+    const undoManagerRef = useRef<UndoManager | null>(null);
 
 
     const hasFunctionalGoal = (cluster: Cluster) => (
@@ -433,6 +434,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         // undo: add undo manager, this is the object that keeps track of the
         //   history of changes made to the graph
         const undoManager = new UndoManager();
+        undoManagerRef.current = undoManager;
         const listener = (_sender: string, evt: EventObject) => {
             undoManager.undoableEditHappened(evt.getProperty("edit"));
         };
@@ -657,12 +659,95 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             }
         });
 
+
         observer.observe(container);
 
         return () => observer.disconnect();
     }, [showGraphSection, graph]);
 
+    // 在 GraphWorker 组件内部，return 之前，其他 useEffect 之后添加：
 
+// Keyboard shortcuts: Save, Redo, Export toggle
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Ignore if user is typing in an input/textarea
+            const target = event.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            const isModifier = event.ctrlKey || event.metaKey;
+
+            // Ctrl+S / Cmd+S → Save
+            if (isModifier && event.key === 's') {
+                event.preventDefault();
+                const saveBtn = document.querySelector('.btn-save-hover') as HTMLButtonElement;
+                if (saveBtn) {
+                    saveBtn.click();
+                }
+                return;
+            }
+
+            // Ctrl+Shift+Z / Cmd+Shift+Z → Redo (currently not supported by UndoManager)
+            if (isModifier && event.shiftKey && event.key === 'z') {
+                event.preventDefault();
+                // UndoManager from @maxgraph/core does not provide a redo() method.
+                // This shortcut is reserved for future implementation.
+                return;
+            }
+            // Ctrl+A / Cmd+A → Select all cells on the canvas
+            if (isModifier && event.key === 'a') {
+                event.preventDefault();
+                if (!graph) return;
+                const allCells = graph.getChildVertices(graph.getDefaultParent());
+                graph.setSelectionCells(allCells);
+                return;
+            }
+
+            // Ctrl+D / Cmd+D → Duplicate selected cells
+            if (isModifier && event.key === 'd') {
+                event.preventDefault();
+                if (!graph) return;
+                const selectedCells = graph.getSelectionCells();
+                if (selectedCells.length === 0) return;
+
+                // Clone the selected cells
+                const clones = graph.cloneCells(selectedCells);
+
+                // Offset clones so they don't overlap perfectly
+                clones.forEach((clone, i) => {
+                    const geo = clone.getGeometry();
+                    if (geo) {
+                        geo.x += 30 + i * 10;
+                        geo.y += 30 + i * 10;
+                    }
+                });
+
+                // Add clones to the graph
+                graph.addCells(clones, graph.getDefaultParent(), null, null, null);
+
+                // Select the cloned cells so user can move them immediately
+                graph.setSelectionCells(clones);
+                graph.refresh();
+                return;
+            }
+
+            // Ctrl+E / Cmd+E → Toggle Export dropdown
+            if (isModifier && event.key === 'e') {
+                event.preventDefault();
+                const exportToggle = document.querySelector('.btn-export-hover .dropdown-toggle') as HTMLButtonElement;
+                if (exportToggle) {
+                    exportToggle.click();
+                }
+                return;
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [graph]);
     // --------------------------------------------------------------------------------------------------------------------------------------------------
     const nAssociatedGoal =
         deletingCells && graph
