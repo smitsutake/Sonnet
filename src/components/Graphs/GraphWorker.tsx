@@ -26,7 +26,7 @@ import {registerCustomShapes} from "./GraphShapes";
 import "./GraphWorker.css";
 import {useFileContext} from "../context/FileProvider.tsx";
 import {useGraph} from "../context/GraphContext";
-import {Cluster, GlobObject, InstanceId} from "../types.ts";
+import {Cluster, GlobObject, InstanceId, TreeGoal} from "../types.ts";
 import GraphSidebar from "./GraphSidebar";
 import WarningMessage from "./WarningMessage";
 
@@ -36,6 +36,7 @@ import {removeGoalIdFromTree, updateTextForInstanceId, updatePositionForInstance
 import ConfirmModal from "../ConfirmModal.tsx";
 import {parseGoalRefId} from "../utils/GraphUtils";
 import {fixEditorPosition, returnFocusToGraph} from "../utils/GraphUtils.tsx";
+import {addGoalToTab, addGoalToTree} from "../context/treeDataSlice.ts";
 
 //Graph id & Side bar id
 const GRAPH_DIV_ID = "graphContainer";
@@ -57,7 +58,7 @@ interface CellHistory {
 
 const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection = false}) => {
     const divGraph = useRef<HTMLDivElement>(null);
-    const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals} = useFileContext();
+    const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals, treeData, goals} = useFileContext();
     const {graph, setGraph} = useGraph();
     const treeIdsRef = useRef(treeIds);
     treeIdsRef.current = treeIds;
@@ -187,7 +188,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     //   }
     // };
 
-    const prevShowGraphSectionRef = useRef(false);
+    //const prevShowGraphSectionRef = useRef(false);
     // Using useRef instead of useState because this value is only used to detect
     // changes (comparing previous vs current count) and does not affect UI rendering.
     // Updating a ref doesn't trigger re-renders, which is more efficient for this use case.
@@ -665,9 +666,8 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         return () => observer.disconnect();
     }, [showGraphSection, graph]);
 
-    // 在 GraphWorker 组件内部，return 之前，其他 useEffect 之后添加：
 
-// Keyboard shortcuts: Save, Redo, Export toggle
+// Keyboard shortcuts: Save, Export, Select All, Duplicate
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             // Ignore if user is typing in an input/textarea
@@ -688,13 +688,12 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 return;
             }
 
-            // Ctrl+Shift+Z / Cmd+Shift+Z → Redo (currently not supported by UndoManager)
+            // Ctrl+Shift+Z / Cmd+Shift+Z → Redo (reserved, not supported)
             if (isModifier && event.shiftKey && event.key === 'z') {
                 event.preventDefault();
-                // UndoManager from @maxgraph/core does not provide a redo() method.
-                // This shortcut is reserved for future implementation.
                 return;
             }
+
             // Ctrl+A / Cmd+A → Select all cells on the canvas
             if (isModifier && event.key === 'a') {
                 event.preventDefault();
@@ -704,31 +703,69 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 return;
             }
 
-            // Ctrl+D / Cmd+D → Duplicate selected cells
+            // Ctrl+D / Cmd+D → Duplicate selected nodes via data layer
             if (isModifier && event.key === 'd') {
                 event.preventDefault();
                 if (!graph) return;
+
                 const selectedCells = graph.getSelectionCells();
                 if (selectedCells.length === 0) return;
 
-                // Clone the selected cells
-                const clones = graph.cloneCells(selectedCells);
-
-                // Offset clones so they don't overlap perfectly
-                clones.forEach((clone, i) => {
-                    const geo = clone.getGeometry();
-                    if (geo) {
-                        geo.x += 30 + i * 10;
-                        geo.y += 30 + i * 10;
+                // Helper: recursively find a TreeGoal by instanceId in the tree data
+                const findNodeByInstanceId = (nodes: TreeGoal[], instanceId: string): TreeGoal | null => {
+                    for (const node of nodes) {
+                        if (node.instanceId === instanceId) return node;
+                        if (node.children) {
+                            const found = findNodeByInstanceId(node.children, instanceId);
+                            if (found) return found;
+                        }
                     }
+                    return null;
+                };
+
+                // Process each selected cell
+                selectedCells.forEach((cell, index) => {
+                    const cellId = cell.getId();
+                    if (!cellId) return;
+
+                    // Parse instanceId from cell ID (e.g., "Functional-1-1" → "1-1")
+                    console.log(treeData.map(n => n.instanceId));
+                    const match = cellId.match(/^(Functional|Nonfunctional)-\[?(.+?)\]?$/);
+                    if (!match) return;
+                    const instanceId = match[2];
+
+                    // Find the original TreeGoal in the data layer
+                    const originalGoal = findNodeByInstanceId(treeData, instanceId);
+                    if (!originalGoal) {
+                        console.warn('Original goal not found for instanceId:', instanceId);
+                        return;
+                    }
+
+                    // Generate a new unique ID for the duplicated goal
+                    const maxId = Math.max(0, ...Object.keys(goals).map(Number));
+                    const newId = maxId + 1;
+
+                    // Generate a new instanceId (simple approach: use newId-1)
+                    // Note: If there is already an instance with same goalId, this may conflict.
+                    // For a robust solution, consider using a timestamp or a proper generator.
+                    const newInstanceId = `${newId}-1` as InstanceId;
+
+                    // Create a new TreeGoal (copy content, type, color, with offset position)
+                    // Children are NOT copied to keep the operation simple and avoid complexity.
+                    const newGoal: TreeGoal = {
+                        ...originalGoal,
+                        id: newId,
+                        instanceId: newInstanceId,
+                        x: (originalGoal.x ?? 0) + 30 + index * 10,
+                        y: (originalGoal.y ?? 0) + 30 + index * 10,
+                        children: [], // Do not copy children; edges will be handled by data sync
+                    };
+
+                    // Add to data layer: this will update both the left list and the tree
+                    dispatch(addGoalToTab(newGoal));
+                    dispatch(addGoalToTree(newGoal));
                 });
 
-                // Add clones to the graph
-                graph.addCells(clones, graph.getDefaultParent(), null, null, null);
-
-                // Select the cloned cells so user can move them immediately
-                graph.setSelectionCells(clones);
-                graph.refresh();
                 return;
             }
 
@@ -743,11 +780,12 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             }
         };
 
-        document.addEventListener('keydown', handleKeyDown);
+        // Use capture phase (true) to intercept before browser default actions
+        document.addEventListener('keydown', handleKeyDown, true);
         return () => {
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keydown', handleKeyDown, true);
         };
-    }, [graph]);
+    }, [graph, dispatch, treeData, goals]);
     // --------------------------------------------------------------------------------------------------------------------------------------------------
     const nAssociatedGoal =
         deletingCells && graph
