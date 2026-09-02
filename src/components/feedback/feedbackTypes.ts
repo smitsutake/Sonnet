@@ -34,41 +34,9 @@ export type FeedbackItem = {
 	targets: InstanceId[];
 };
 
-// ============================================================
-// Grading
-// ============================================================
-//
-// A grade is separate from the per-goal comments: it is the reviewer's verdict
-// on the model as a whole. It lives inside the same feedback block so that a
-// file carries one self-contained record of everything a reviewer added.
-//
-// Scores are entirely reviewer-defined. Nothing here assumes a marking scheme,
-// a maximum, or that the parts add up to the total, because AMMBER is used
-// across several subjects with different rubrics.
-
-export const MAX_OVERALL_FEEDBACK_LENGTH = 500;
-
-export type GradeCriterion = {
-	id: string;
-	label: string;
-	score: number;
-	outOf: number;
-};
-
-export type GradeData = {
-	totalScore: number;
-	totalOutOf: number;
-	criteria: GradeCriterion[];
-	overallFeedback: string;
-	gradedBy: string;
-	gradedAt: string;
-};
-
 export type FeedbackData = {
 	status: FeedbackStatus;
 	items: FeedbackItem[];
-	// Absent until a reviewer grades the model.
-	grade?: GradeData;
 	// Last time the feedback block itself was written.
 	updatedAt: string;
 };
@@ -89,28 +57,9 @@ export const FeedbackItemSchema = z.object({
 	targets: instanceIdSchema.array(),
 });
 
-export const GradeCriterionSchema = z.object({
-	id: z.string(),
-	label: z.string(),
-	score: z.number(),
-	outOf: z.number(),
-});
-
-export const GradeDataSchema = z.object({
-	totalScore: z.number(),
-	totalOutOf: z.number(),
-	criteria: GradeCriterionSchema.array(),
-	overallFeedback: z.string().max(MAX_OVERALL_FEEDBACK_LENGTH),
-	gradedBy: z.string(),
-	gradedAt: z.string(),
-});
-
 export const FeedbackDataSchema = z.object({
 	status: z.enum([FEEDBACK_STATUS.FEEDBACKED, FEEDBACK_STATUS.UNFEEDBACKED]),
 	items: FeedbackItemSchema.array(),
-	// Optional so that files graded by no one, and files written before
-	// grading existed, both still parse.
-	grade: GradeDataSchema.optional(),
 	updatedAt: z.string(),
 });
 
@@ -181,50 +130,3 @@ export const formatFeedbackDate = (iso: string): string => {
 	});
 };
 
-// ============================================================
-// Grade helpers
-// ============================================================
-
-const randomId = (prefix: string): string =>
-	typeof crypto !== "undefined" && "randomUUID" in crypto
-		? `${prefix}-${crypto.randomUUID()}`
-		: `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-
-export const createGradeCriterion = (): GradeCriterion => ({
-	id: randomId("crit"),
-	label: "",
-	score: 0,
-	outOf: 0,
-});
-
-export const createEmptyGrade = (gradedBy: string): GradeData => ({
-	totalScore: 0,
-	totalOutOf: 0,
-	criteria: [],
-	overallFeedback: "",
-	gradedBy,
-	gradedAt: new Date().toISOString(),
-});
-
-// A grade counts as present only once the reviewer has actually put something
-// in it. An untouched form should not make a "Your Grade" button appear.
-export const hasGrade = (grade: GradeData | undefined | null): boolean => {
-	if (!grade) {
-		return false;
-	}
-	return (
-		grade.overallFeedback.trim() !== ""
-		|| grade.totalOutOf > 0
-		|| grade.totalScore > 0
-		|| grade.criteria.length > 0
-	);
-};
-
-// Percentage for display. Returns null when no maximum was set, because
-// dividing by zero would otherwise show NaN in the student's view.
-export const gradePercentage = (grade: GradeData): number | null => {
-	if (grade.totalOutOf <= 0) {
-		return null;
-	}
-	return Math.round((grade.totalScore / grade.totalOutOf) * 1000) / 10;
-};

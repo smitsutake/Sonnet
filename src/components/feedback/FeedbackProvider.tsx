@@ -1,12 +1,6 @@
 import React, {PropsWithChildren, useCallback, useMemo, useState} from "react";
 import {InstanceId} from "../types.ts";
-import {
-	createFeedbackItem,
-	FeedbackData,
-	FeedbackItem,
-	GradeData,
-	hasGrade,
-} from "./feedbackTypes.ts";
+import {createFeedbackItem, FeedbackData, FeedbackItem} from "./feedbackTypes.ts";
 import {MAX_FEEDBACK_ITEMS} from "./feedbackColours.ts";
 import {FeedbackContext} from "./feedbackContext.ts";
 
@@ -30,8 +24,6 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 	const [fileHadFeedback, setFileHadFeedback] = useState(false);
 	const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-	const [grade, setGrade] = useState<GradeData | null>(null);
-	const [isGradeVisible, setGradeVisible] = useState(false);
 
 	const startReviewSession = useCallback((name: string) => {
 		setReviewerName(name.trim());
@@ -96,12 +88,6 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 		setFileHadFeedback(data !== null);
 		setLinkingItemId(null);
 		setSelectedItemId(null);
-
-		const loadedGrade = data?.grade ?? null;
-		setGrade(loadedGrade);
-		// Show the grade as soon as a graded model is opened, so a student does
-		// not have to know to go looking for it.
-		setGradeVisible(hasGrade(loadedGrade));
 	}, []);
 
 	const value = useMemo(
@@ -120,10 +106,6 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			setLinkingItemId,
 			selectedItemId,
 			setSelectedItemId,
-			grade,
-			setGrade,
-			isGradeVisible,
-			setGradeVisible,
 		}),
 		[
 			reviewerName,
@@ -138,8 +120,6 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			fileHadFeedback,
 			linkingItemId,
 			selectedItemId,
-			grade,
-			isGradeVisible,
 		]
 	);
 
