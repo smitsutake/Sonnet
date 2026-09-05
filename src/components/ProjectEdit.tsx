@@ -29,11 +29,11 @@ const ProjectEdit: React.FC = () => {
     const {  reviewerName} = useFeedbackContext();
 
 
-    // 👇 判断是否是教师模式
+    // chechk if is in teachermode
     const isTeacher = reviewerName !== null;
 
     useEffect(() => {
-        console.log('📊 ProjectEdit 加载:');
+        console.log(' ProjectEdit loading:');
         console.log('  treeData:', treeData);
         console.log('  tabData:', tabData);
         console.log('  tree:', tree);
@@ -43,7 +43,7 @@ const ProjectEdit: React.FC = () => {
         console.log('  tree length:', tree?.length || 0);
     }, [treeData, tabData, tree, goals, tabs]);
 
-    // 👇 学生提交模型
+    // student submitted model
     const handleSendModel = async (modelName: string, description: string, author: string) => {
         try {
             const tabDataForSave = Array.from(tabs.values()).map((tab) => ({
@@ -59,7 +59,7 @@ const ProjectEdit: React.FC = () => {
                 tabData: tabDataForSave,
             };
 
-            console.log('📤 Saving model data:', modelData);
+            console.log('Saving model data:', modelData);
 
             await saveSubmittedModel({
                 id: `model-${Date.now()}`,
@@ -72,16 +72,16 @@ const ProjectEdit: React.FC = () => {
             });
 
             setShowSendModal(false);
-            alert('✅ Model submitted successfully!');
+            alert('Model submitted successfully!');
             navigate('/viewModel');
 
         } catch (error) {
             console.error('Failed to submit model:', error);
-            alert('❌ Submission failed, please try again');
+            alert('Submission failed, please try again');
         }
     };
 
-    // 👇 新增：教师 Send Back（批改完成）
+    // teacher  Send Back model
     const handleSendBack = async () => {
         if (!isTeacher) {
             alert('Only teachers can perform this action');
@@ -108,12 +108,12 @@ const ProjectEdit: React.FC = () => {
 
             sessionStorage.removeItem('editingModelId');
 
-            alert('✅ Model reviewed and sent back successfully!');
+            alert('Model reviewed and sent back successfully!');
             navigate('/viewModel');
 
         } catch (error) {
             console.error('Send back failed:', error);
-            alert('❌ Send back failed, please try again');
+            alert(' Send back failed, please try again');
         }
     };
 
@@ -135,7 +135,7 @@ const ProjectEdit: React.FC = () => {
             <GradeViewModal show={isGradeVisible}
                             grade={grade}
                             onClose={() => setGradeVisible(false)}/>
-            {/* 👇 按钮区域 */}
+            {/* new add:buttom area */}
             <div className="d-flex justify-content-between align-items-center p-2"
                  style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
                 <div>

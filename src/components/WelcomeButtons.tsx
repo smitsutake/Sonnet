@@ -262,7 +262,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						</Button>
 
 
-						{/* 👇 新增：View Model 按钮 */}
+						{/* mew add：View Model buttom */}
 						<Button
 							variant="success"
 							size="lg"
@@ -273,7 +273,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						</Button>
 					</div>
 
-					{/* 👇 显示教师姓名（如果是教师模式） */}
+					{/* show staff name when it's in staff mode */}
 					{reviewerName !== null && (
 						<div className="position-absolute" style={{bottom: "40px"}}>
                 <span className="text-muted small">
@@ -325,7 +325,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 					>
 						For Teaching Staff
 					</Button>
-					{/* 新用来放model的页面*/}
+					{/* new add:page to store models*/}
 					<Button
 						variant="primary"
 						size="lg"

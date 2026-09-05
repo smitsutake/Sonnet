@@ -34,10 +34,10 @@ const ViewModel = () => {
             setLoading(true);
             setError(null);
             const loaded = await getSubmittedModels();
-            console.log('📋 加载的模型:', loaded);
+            console.log('loading model:', loaded);
             setModels(loaded);
         } catch (err) {
-            setError('加载模型失败');
+            setError('fail load');
             console.error(err);
         } finally {
             setLoading(false);
@@ -55,9 +55,9 @@ const ViewModel = () => {
         }
     };
 
-    // 👇 关键修改：将反馈数据转换为 FeedbackData 格式
+    // change feedback data into FeedbackData
     const convertToFeedbackData = (model: SubmittedModel): FeedbackData | null => {
-        // 1. 如果有 feedbackItems，使用它们
+        // use feedbackItems if include
         if (model.feedbackItems && model.feedbackItems.length > 0) {
             const feedbackItems: FeedbackItem[] = model.feedbackItems.map(item => ({
                 id: item.id,
@@ -67,7 +67,7 @@ const ViewModel = () => {
                 targets: item.targets || [],
             }));
 
-            // 如果有 grade 信息，添加到 feedback data
+            // if set grade,add it to feedback data
             const hasGrade = model.grade && model.grade.score > 0;
 
             return {
@@ -85,7 +85,7 @@ const ViewModel = () => {
             };
         }
 
-        // 2. 兼容旧格式：只有单个 feedback 字符串
+        // 2. Compatible with older formats: Only a single feedback string.
         if (model.status === 'reviewed' && model.feedback) {
             const feedbackItems: FeedbackItem[] = [{
                 id: `fb-${Date.now()}`,
@@ -114,7 +114,7 @@ const ViewModel = () => {
     };
 
 
-    // 👇 查看模型（加载到编辑器）
+    // View the model
     const handleViewModel = async (model: SubmittedModel) => {
         try {
             if (!dispatch) {
@@ -123,7 +123,7 @@ const ViewModel = () => {
                 return;
             }
 
-            // 如果当前是教师模式且模型状态是 "已提交"，更新为 "批改中"
+            //If the current mode is teacher mode and the model status is "Submitted", update to "Grading".
             if (isTeacher && model.status === 'sent') {
                 await updateModelStatusToViewing(model.id);
                 await loadModels();
@@ -146,24 +146,24 @@ const ViewModel = () => {
                 }));
             }
 
-            // 👇 关键：加载模型数据到编辑器
+            // Load model data into the editor
             dispatch(reset({
                 treeData: treeData,
                 tabData: tabData,
             }));
 
-            // 👇 关键：加载反馈数据到 FeedbackContext
+            //  Loading feedback data into FeedbackContext
             const feedbackData = convertToFeedbackData(model);
             if (feedbackData) {
                 loadItems(feedbackData);
-                // 如果有 grade，设置 grade 并显示
+                //If a grade exists, set the grade and display it.
                 if (feedbackData.grade) {
                     setGrade(feedbackData.grade);
                     setGradeVisible(true);
                 }
                 console.log('✅ feedback has load:', feedbackData);
             } else {
-                // 没有反馈时清空
+                // clean if no feedback
                 loadItems(null);
                 setGrade(null);
             }
@@ -175,7 +175,7 @@ const ViewModel = () => {
         }
     };
 
-    // 👇 查看反馈详情
+    // detaoled feedback
     const handleViewFeedback = (model: SubmittedModel) => {
         setSelectedModel(model);
         setShowGradeModal(true);
@@ -346,7 +346,7 @@ const ViewModel = () => {
                 )}
             </Container>
 
-            {/* 反馈详情弹窗 */}
+            {/* Feedback details pop-up window */}
             <Modal show={showGradeModal} onHide={() => setShowGradeModal(false)} centered size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>📋 detailed review</Modal.Title>

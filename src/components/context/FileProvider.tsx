@@ -210,9 +210,10 @@ const FileProvider: React.FC<PropsWithChildren> = ({children}) => {
 };
 
 
-// 添加这个函数到 FileProvider 组件中
-import {InitialTab} from "../../data/initialTabs.ts";   // 👈 加上 InitialTab
 
+// new add
+
+import {InitialTab} from "../../data/initialTabs.ts";
 export const tabsToInitialTabs = (
     tabs: Map<Label, TabContent>,
     goals: Record<TreeGoal["id"], TreeGoal>
