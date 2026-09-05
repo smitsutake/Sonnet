@@ -1,6 +1,5 @@
 // src/components/ViewModel.tsx
-// src/components/ViewModel.tsx
-// src/components/ViewModel.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Spinner, Alert, Modal } from 'react-bootstrap';
 import {
