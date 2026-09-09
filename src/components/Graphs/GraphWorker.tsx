@@ -666,7 +666,27 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         return () => observer.disconnect();
     }, [showGraphSection, graph]);
 
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const source = window.__dragSource;
+            if (source === 'sidebar') {
+                const rect = divGraph.current?.getBoundingClientRect();
+                if (rect) {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    const isOver = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+                    setIsDragOver(isOver);
+                }
+            } else {
+                setIsDragOver(false);
+            }
+        };
 
+        document.addEventListener('mousemove', handleMouseMove);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
 // Keyboard shortcuts: Save, Export, Select All, Duplicate
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -860,8 +880,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                         pointerEvents: 'none',
                         zIndex: 10,
                     }}>
-                        <p style={{fontSize: '20px'}}>🖼️ The canvas is empty</p>
-                        <p style={{fontSize: '14px'}}>Drag a symbol from the left toolbar onto the canvas
+                        <p style={{fontSize: '20px'}}>Drag a symbol from the right toolbar onto the canvas
                             to start modeling</p>
                     </div>
                 )}

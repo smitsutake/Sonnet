@@ -513,9 +513,7 @@ const Tree: React.FC<TreeProps> = ({
                     textAlign: "center",
                     padding: "20% 2rem 2rem 2rem",
                 }}>
-                    <p style={{fontSize: "18px", margin: 0}}>📂 Drag goals here to build your hierarchy</p>
-                    <p style={{fontSize: "14px", marginTop: "8px"}}>
-                        Select goals from the left panel and drag them into this area
+                    <p style={{fontSize: "18px", margin: 0}}>📂 Drag goals here to build your hierarchy
                     </p>
                 </div>
             ) : (
