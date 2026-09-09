@@ -9,6 +9,7 @@ import {
     Graph,
     InternalEvent,
     KeyHandler,
+    PanningHandler,
     RubberBandHandler,
     UndoManager,
 } from "@maxgraph/core";
@@ -25,7 +26,7 @@ import {registerCustomShapes} from "./GraphShapes";
 import "./GraphWorker.css";
 import {useFileContext} from "../context/FileProvider.tsx";
 import {useGraph} from "../context/GraphContext";
-import {Cluster, GlobObject, InstanceId} from "../types.ts";
+import {Cluster, GlobObject, InstanceId, TreeGoal} from "../types.ts";
 import GraphSidebar from "./GraphSidebar";
 import WarningMessage from "./WarningMessage";
 
@@ -35,6 +36,7 @@ import {removeGoalIdFromTree, updateTextForInstanceId, updatePositionForInstance
 import ConfirmModal from "../ConfirmModal.tsx";
 import {parseGoalRefId} from "../utils/GraphUtils";
 import {fixEditorPosition, returnFocusToGraph} from "../utils/GraphUtils.tsx";
+import {addGoalToTab, addGoalToTree} from "../context/treeDataSlice.ts";
 
 //Graph id & Side bar id
 const GRAPH_DIV_ID = "graphContainer";
@@ -56,12 +58,13 @@ interface CellHistory {
 
 const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection = false}) => {
     const divGraph = useRef<HTMLDivElement>(null);
-    const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals} = useFileContext();
+    const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals, treeData, goals} = useFileContext();
     const {graph, setGraph} = useGraph();
     const treeIdsRef = useRef(treeIds);
     treeIdsRef.current = treeIds;
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.
     const isRenderingRef = useRef(false);
+    const undoManagerRef = useRef<UndoManager | null>(null);
 
 
     const hasFunctionalGoal = (cluster: Cluster) => (
@@ -185,7 +188,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     //   }
     // };
 
-    const prevShowGraphSectionRef = useRef(false);
+    //const prevShowGraphSectionRef = useRef(false);
     // Using useRef instead of useState because this value is only used to detect
     // changes (comparing previous vs current count) and does not affect UI rendering.
     // Updating a ref doesn't trigger re-renders, which is more efficient for this use case.
@@ -225,6 +228,12 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         //graph.setConnectable(true);
         graph.setCellsEditable(true);
         graph.setPanning(true);
+        const panningHandler = graph.getPlugin<PanningHandler>(PanningHandler.pluginId);
+        if (panningHandler) {
+            // Pan with the primary mouse button only when the pointer is over
+            // empty canvas space, leaving goal dragging and resizing unchanged.
+            panningHandler.useLeftButtonForPanning = true;
+        }
         graph.setCellsResizable(true);
         graph.setCellsMovable(true); // Allow cells to be moved
         graph.setCellsSelectable(true); // Allow cells to be selected
@@ -273,10 +282,13 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     const graphListener = useCallback((graph: Graph): (() => void) => {
         const cellHistory: CellHistory = {};
         const changeHandler = (_sender: string, evt: EventObject) => {
+                const changes = evt.getProperty("edit").changes;
+                const hasNonStyleChanges = changes.some(
+                    (change: {constructor: {name: string}}) => change.constructor.name != "StyleChange"
+                );
                 graph.getDataModel().beginUpdate();
                 evt.consume();
                 try {
-                    const changes = evt.getProperty("edit").changes;
                     for (let i = 0; i < changes.length; i++) {
                         const change = changes[i];
                         if (change.constructor.name == "GeometryChange") {
@@ -364,7 +376,10 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                     }
                 } finally {
                     graph.getDataModel().endUpdate();
-                    graph.refresh();
+                    // Style changes are already redrawn by maxGraph and must retain the hidden label while editing.
+                    if (hasNonStyleChanges) {
+                        graph.refresh();
+                    }
                 }
             };
         graph.getDataModel().addListener(InternalEvent.CHANGE, changeHandler);
@@ -420,6 +435,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         // undo: add undo manager, this is the object that keeps track of the
         //   history of changes made to the graph
         const undoManager = new UndoManager();
+        undoManagerRef.current = undoManager;
         const listener = (_sender: string, evt: EventObject) => {
             undoManager.undoableEditHappened(evt.getProperty("edit"));
         };
@@ -644,12 +660,152 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             }
         });
 
+
         observer.observe(container);
 
         return () => observer.disconnect();
     }, [showGraphSection, graph]);
 
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const source = window.__dragSource;
+            if (source === 'sidebar') {
+                const rect = divGraph.current?.getBoundingClientRect();
+                if (rect) {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    const isOver = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+                    setIsDragOver(isOver);
+                }
+            } else {
+                setIsDragOver(false);
+            }
+        };
 
+        document.addEventListener('mousemove', handleMouseMove);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
+// Keyboard shortcuts: Save, Export, Select All, Duplicate
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Ignore if user is typing in an input/textarea
+            const target = event.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            const isModifier = event.ctrlKey || event.metaKey;
+
+            // Ctrl+S / Cmd+S → Save
+            if (isModifier && event.key === 's') {
+                event.preventDefault();
+                const saveBtn = document.querySelector('.btn-save-hover') as HTMLButtonElement;
+                if (saveBtn) {
+                    saveBtn.click();
+                }
+                return;
+            }
+
+            // Ctrl+Shift+Z / Cmd+Shift+Z → Redo (reserved, not supported)
+            if (isModifier && event.shiftKey && event.key === 'z') {
+                event.preventDefault();
+                return;
+            }
+
+            // Ctrl+A / Cmd+A → Select all cells on the canvas
+            if (isModifier && event.key === 'a') {
+                event.preventDefault();
+                if (!graph) return;
+                const allCells = graph.getChildVertices(graph.getDefaultParent());
+                graph.setSelectionCells(allCells);
+                return;
+            }
+
+            // Ctrl+D / Cmd+D → Duplicate selected nodes via data layer
+            if (isModifier && event.key === 'd') {
+                event.preventDefault();
+                if (!graph) return;
+
+                const selectedCells = graph.getSelectionCells();
+                if (selectedCells.length === 0) return;
+
+                // Helper: recursively find a TreeGoal by instanceId in the tree data
+                const findNodeByInstanceId = (nodes: TreeGoal[], instanceId: string): TreeGoal | null => {
+                    for (const node of nodes) {
+                        if (node.instanceId === instanceId) return node;
+                        if (node.children) {
+                            const found = findNodeByInstanceId(node.children, instanceId);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+
+                // Process each selected cell
+                selectedCells.forEach((cell, index) => {
+                    const cellId = cell.getId();
+                    if (!cellId) return;
+
+                    // Parse instanceId from cell ID (e.g., "Functional-1-1" → "1-1")
+                    console.log(treeData.map(n => n.instanceId));
+                    const match = cellId.match(/^(Functional|Nonfunctional)-\[?(.+?)\]?$/);
+                    if (!match) return;
+                    const instanceId = match[2];
+
+                    // Find the original TreeGoal in the data layer
+                    const originalGoal = findNodeByInstanceId(treeData, instanceId);
+                    if (!originalGoal) {
+                        console.warn('Original goal not found for instanceId:', instanceId);
+                        return;
+                    }
+
+                    // Generate a new unique ID for the duplicated goal
+                    const maxId = Math.max(0, ...Object.keys(goals).map(Number));
+                    const newId = maxId + 1;
+
+                    // Generate a new instanceId (simple approach: use newId-1)
+                    // Note: If there is already an instance with same goalId, this may conflict.
+                    // For a robust solution, consider using a timestamp or a proper generator.
+                    const newInstanceId = `${newId}-1` as InstanceId;
+
+                    // Create a new TreeGoal (copy content, type, color, with offset position)
+                    // Children are NOT copied to keep the operation simple and avoid complexity.
+                    const newGoal: TreeGoal = {
+                        ...originalGoal,
+                        id: newId,
+                        instanceId: newInstanceId,
+                        x: (originalGoal.x ?? 0) + 30 + index * 10,
+                        y: (originalGoal.y ?? 0) + 30 + index * 10,
+                        children: [], // Do not copy children; edges will be handled by data sync
+                    };
+
+                    // Add to data layer: this will update both the left list and the tree
+                    dispatch(addGoalToTab(newGoal));
+                    dispatch(addGoalToTree(newGoal));
+                });
+
+                return;
+            }
+
+            // Ctrl+E / Cmd+E → Toggle Export dropdown
+            if (isModifier && event.key === 'e') {
+                event.preventDefault();
+                const exportToggle = document.querySelector('.btn-export-hover .dropdown-toggle') as HTMLButtonElement;
+                if (exportToggle) {
+                    exportToggle.click();
+                }
+                return;
+            }
+        };
+
+        // Use capture phase (true) to intercept before browser default actions
+        document.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, true);
+        };
+    }, [graph, dispatch, treeData, goals]);
     // --------------------------------------------------------------------------------------------------------------------------------------------------
     const nAssociatedGoal =
         deletingCells && graph
@@ -724,8 +880,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                         pointerEvents: 'none',
                         zIndex: 10,
                     }}>
-                        <p style={{fontSize: '20px'}}>🖼️ The canvas is empty</p>
-                        <p style={{fontSize: '14px'}}>Drag a symbol from the left toolbar onto the canvas
+                        <p style={{fontSize: '20px'}}>Drag a symbol from the right toolbar onto the canvas
                             to start modeling</p>
                     </div>
                 )}

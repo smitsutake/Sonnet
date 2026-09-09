@@ -1,3 +1,8 @@
+declare global {
+    interface Window {
+        __dragSource?: string | null;
+    }
+}
 import {useEffect, useRef} from "react";
 import {Graph, MaxToolbar, Cell, CellStateStyle, Geometry, Point, gestureUtils} from "@maxgraph/core";
 
@@ -115,6 +120,22 @@ const SidebarItems = ({graph, className=""}: SidebarItemsProps) => {
             symbol.imagePath
         );
         sidebarItem.style.width = (symbol.type === "Stakeholder") ? "30px" : "60px";
+
+        sidebarItem.addEventListener('mousedown', () => {
+            window.__dragSource = 'sidebar';
+        });
+
+        sidebarItem.addEventListener('mouseup', () => {
+            setTimeout(() => {
+                window.__dragSource = null;
+            }, 100);
+        });
+
+        sidebarItem.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                window.__dragSource = null;
+            }, 100);
+        });
 
         gestureUtils.makeDraggable(sidebarItem, graph, dragAndDropHandler);
     };
