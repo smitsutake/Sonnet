@@ -282,106 +282,106 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     const graphListener = useCallback((graph: Graph): (() => void) => {
         const cellHistory: CellHistory = {};
         const changeHandler = (_sender: string, evt: EventObject) => {
-                const changes = evt.getProperty("edit").changes;
-                const hasNonStyleChanges = changes.some(
-                    (change: {constructor: {name: string}}) => change.constructor.name != "StyleChange"
-                );
-                graph.getDataModel().beginUpdate();
-                evt.consume();
-                try {
-                    for (let i = 0; i < changes.length; i++) {
-                        const change = changes[i];
-                        if (change.constructor.name == "GeometryChange") {
-                            const cell: Cell = changes[i].cell;
-                            const cellID = cell.getId();
-                            const oldStyle = cell.getStyle();
-                            const newWidth = cell.getGeometry()?.height;
-                            const newHeight = cell.getGeometry()?.width;
+            const changes = evt.getProperty("edit").changes;
+            const hasNonStyleChanges = changes.some(
+                (change: {constructor: {name: string}}) => change.constructor.name != "StyleChange"
+            );
+            graph.getDataModel().beginUpdate();
+            evt.consume();
+            try {
+                for (let i = 0; i < changes.length; i++) {
+                    const change = changes[i];
+                    if (change.constructor.name == "GeometryChange") {
+                        const cell: Cell = changes[i].cell;
+                        const cellID = cell.getId();
+                        const oldStyle = cell.getStyle();
+                        const newWidth = cell.getGeometry()?.height;
+                        const newHeight = cell.getGeometry()?.width;
 
-                            if (cellID != null && cellHistory[cellID] == undefined) {
-                                cellHistory[cellID] = [newWidth, newHeight];
-                            } else {
-                                if (cellID != null) {
-                                    const oldWidth = cellHistory[cellID][0];
-                                    const oldHeight = cellHistory[cellID][1];
-                                    if (oldWidth && oldHeight && newWidth && newHeight) {
-                                        let newFontSize =
-                                            adjustFontSize(
-                                                oldStyle,
-                                                oldWidth,
-                                                oldHeight,
-                                                newWidth,
-                                                newHeight
-                                            ) || 1;
+                        if (cellID != null && cellHistory[cellID] == undefined) {
+                            cellHistory[cellID] = [newWidth, newHeight];
+                        } else {
+                            if (cellID != null) {
+                                const oldWidth = cellHistory[cellID][0];
+                                const oldHeight = cellHistory[cellID][1];
+                                if (oldWidth && oldHeight && newWidth && newHeight) {
+                                    let newFontSize =
+                                        adjustFontSize(
+                                            oldStyle,
+                                            oldWidth,
+                                            oldHeight,
+                                            newWidth,
+                                            newHeight
+                                        ) || 1;
 
-                                        const minFontsize = 10;
-                                        const maxFontsize = 30;
-                                        newFontSize = Math.max(minFontsize, newFontSize);
-                                        newFontSize = Math.min(maxFontsize, newFontSize);
+                                    const minFontsize = 10;
+                                    const maxFontsize = 30;
+                                    newFontSize = Math.max(minFontsize, newFontSize);
+                                    newFontSize = Math.min(maxFontsize, newFontSize);
 
-                                        const finalStyle: CellStyle = oldStyle;
-                                        finalStyle.fontSize = newFontSize;
+                                    const finalStyle: CellStyle = oldStyle;
+                                    finalStyle.fontSize = newFontSize;
 
-                                        graph.getDataModel().setStyle(cell, finalStyle);
-                                    }
-                                }
-                            }
-                            if (cellID) {
-                                cellHistory[cellID] = [newWidth, newHeight];
-                            }
-
-                            // Only persist user-initiated drags; skip events fired during renderGraph.
-                            if (!isRenderingRef.current && cellID?.startsWith("Functional-")) {
-                                const geo = cell.getGeometry();
-                                if (geo !== null) {
-                                    const instanceId = validateInstanceId(cellID.replace("Functional-", ""));
-                                    dispatch(updatePositionForInstanceId({instanceId, x: geo.x, y: geo.y}));
+                                    graph.getDataModel().setStyle(cell, finalStyle);
                                 }
                             }
                         }
-                        else if (change.constructor.name == "ValueChange") {
-                            const cell: Cell = change.cell;
-                            // goal id
+                        if (cellID) {
+                            cellHistory[cellID] = [newWidth, newHeight];
+                        }
 
-                            if (isGoalNameEmpty(change.value)) {
-                                graph.getDataModel().setValue(cell, change.previous);
-                                setErrorModal({
-                                    show: true,
-                                    title: "Input Error",
-                                    message: "Goal name cannot be empty.",
-                                    onHide: () => setErrorModal(prev => ({...prev, show: false}))
-                                });
-                                return;
-                            }
-
-                            const numericCellIds = getCellNumericIds(cell);
-                            const newGoalValues = change.value.split(",");
-
-                            // Check if the number of items matches
-                            const nUpdated = numericCellIds.length;
-                            if (nUpdated !== newGoalValues.length) {
-                                graph.getDataModel().setValue(cell, change.previous);
-                                setErrorModal({
-                                    show: true,
-                                    title: "Input Error",
-                                    message: `Please provide ${nUpdated} ${(nUpdated === 1) ? "item" : "items"} separated by commas`,
-                                    onHide: () => setErrorModal(prev => ({...prev, show: false}))
-                                });
-                            } else {
-                                numericCellIds.forEach((instanceId, i) => {
-                                    dispatch(updateTextForInstanceId({instanceId, text: newGoalValues[i]}));
-                                });
+                        // Only persist user-initiated drags; skip events fired during renderGraph.
+                        if (!isRenderingRef.current && cellID?.startsWith("Functional-")) {
+                            const geo = cell.getGeometry();
+                            if (geo !== null) {
+                                const instanceId = validateInstanceId(cellID.replace("Functional-", ""));
+                                dispatch(updatePositionForInstanceId({instanceId, x: geo.x, y: geo.y}));
                             }
                         }
                     }
-                } finally {
-                    graph.getDataModel().endUpdate();
-                    // Style changes are already redrawn by maxGraph and must retain the hidden label while editing.
-                    if (hasNonStyleChanges) {
-                        graph.refresh();
+                    else if (change.constructor.name == "ValueChange") {
+                        const cell: Cell = change.cell;
+                        // goal id
+
+                        if (isGoalNameEmpty(change.value)) {
+                            graph.getDataModel().setValue(cell, change.previous);
+                            setErrorModal({
+                                show: true,
+                                title: "Input Error",
+                                message: "Goal name cannot be empty.",
+                                onHide: () => setErrorModal(prev => ({...prev, show: false}))
+                            });
+                            return;
+                        }
+
+                        const numericCellIds = getCellNumericIds(cell);
+                        const newGoalValues = change.value.split(",");
+
+                        // Check if the number of items matches
+                        const nUpdated = numericCellIds.length;
+                        if (nUpdated !== newGoalValues.length) {
+                            graph.getDataModel().setValue(cell, change.previous);
+                            setErrorModal({
+                                show: true,
+                                title: "Input Error",
+                                message: `Please provide ${nUpdated} ${(nUpdated === 1) ? "item" : "items"} separated by commas`,
+                                onHide: () => setErrorModal(prev => ({...prev, show: false}))
+                            });
+                        } else {
+                            numericCellIds.forEach((instanceId, i) => {
+                                dispatch(updateTextForInstanceId({instanceId, text: newGoalValues[i]}));
+                            });
+                        }
                     }
                 }
-            };
+            } finally {
+                graph.getDataModel().endUpdate();
+                // Style changes are already redrawn by maxGraph and must retain the hidden label while editing.
+                if (hasNonStyleChanges) {
+                    graph.refresh();
+                }
+            }
+        };
         graph.getDataModel().addListener(InternalEvent.CHANGE, changeHandler);
         return () => graph.getDataModel().removeListener(changeHandler);
     }, [dispatch]);
@@ -743,52 +743,54 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                     return null;
                 };
 
-                // Process each selected cell
+                // Get the maximum existing ID to generate unique new IDs
+                const maxId = Math.max(0, ...Object.keys(goals).map(Number));
+
                 selectedCells.forEach((cell, index) => {
                     const cellId = cell.getId();
                     if (!cellId) return;
 
                     // Parse instanceId from cell ID (e.g., "Functional-1-1" → "1-1")
-                    console.log(treeData.map(n => n.instanceId));
                     const match = cellId.match(/^(Functional|Nonfunctional)-\[?(.+?)\]?$/);
                     if (!match) return;
                     const instanceId = match[2];
 
-                    // Find the original TreeGoal in the data layer
+                    // Find the original TreeGoal from the data layer
                     const originalGoal = findNodeByInstanceId(treeData, instanceId);
                     if (!originalGoal) {
                         console.warn('Original goal not found for instanceId:', instanceId);
                         return;
                     }
 
-                    // Generate a new unique ID for the duplicated goal
-                    const maxId = Math.max(0, ...Object.keys(goals).map(Number));
-                    const newId = maxId + 1;
+                    // Get the current position from the canvas cell (real-time, user-dragged position)
+                    const geo = cell.getGeometry();
+                    if (!geo) return;
+                    const baseX = geo.x ?? 0;
+                    const baseY = geo.y ?? 0;
 
-                    // Generate a new instanceId (simple approach: use newId-1)
-                    // Note: If there is already an instance with same goalId, this may conflict.
-                    // For a robust solution, consider using a timestamp or a proper generator.
-                    const newInstanceId = `${newId}-1` as InstanceId;
+                    // Generate new unique IDs
+                    const newId = maxId + 1 + index;
+                    const newInstanceId = `${newId}-${Date.now()}` as InstanceId;
 
                     // Create a new TreeGoal (copy content, type, color, with offset position)
-                    // Children are NOT copied to keep the operation simple and avoid complexity.
+                    // Children are NOT copied to keep the operation simple and avoid complexity
                     const newGoal: TreeGoal = {
                         ...originalGoal,
                         id: newId,
                         instanceId: newInstanceId,
-                        x: (originalGoal.x ?? 0) + 30 + index * 10,
-                        y: (originalGoal.y ?? 0) + 30 + index * 10,
-                        children: [], // Do not copy children; edges will be handled by data sync
+                        x: baseX + 30 + index * 10,
+                        y: baseY + 30 + index * 10,
+                        children: [],
                     };
 
-                    // Add to data layer: this will update both the left list and the tree
+                    // Add to data layer: updates both the left panel and the tree
                     dispatch(addGoalToTab(newGoal));
                     dispatch(addGoalToTree(newGoal));
                 });
 
+                // Data changes automatically trigger re-render via Redux
                 return;
             }
-
             // Ctrl+E / Cmd+E → Toggle Export dropdown
             if (isModifier && event.key === 'e') {
                 event.preventDefault();
