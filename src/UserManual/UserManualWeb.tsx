@@ -56,7 +56,7 @@ const UserManualWeb: React.FC = () => {
                                     <ul className="sub-sub-nav">
 
                                         <li><a href="#landing-page">2.2.1.Landing Page (Home)</a></li>
-                                        <li><a href="#landing-elements">2.2.1.1.Main elements</a></li>
+                                        <li><a href="#landing-staffmode">2.2.1.1.Staff Home Page</a></li>
                                         <li><a href="#editor-goals">2.2.2.Editor — Enter Goals / Arrange Hierarchy</a></li>
                                         <li><a href="#header">2.2.2.1.Header</a></li>
                                         <li><a href="#navigation-bar">2.2.2.2.Navigation Bar</a></li>
@@ -198,7 +198,7 @@ const UserManualWeb: React.FC = () => {
                     <figure className="manual-figure">
                         <img src={images["2.2.1-ammberhomepage"]} alt="Ammber Homepage" />
                     </figure>
-                    <h4 id="landing-elements">Main elements:</h4>
+                    <h4 >Main elements:</h4>
                     <ul className="manual-elements-list">
                         <li>
                             <img src={images["2.2.1-createmodel"]} alt="Create Model button" className="inline-icon" />
@@ -211,7 +211,40 @@ const UserManualWeb: React.FC = () => {
                             {" "}– Allows you to open a model that was created and saved using this
                             builder, stored on your device in JSON format.
                         </li>
+                        <li>
+                            <img src={images["2.2.1-staffmode"]} alt="staffmode" className="inline-icon" />
+                            {" "}– Switch to Staff Mode for lecturer/client to reviewing and grading the model.
+                        </li>
                     </ul>
+                    <h4 id="landing-staffmode">2.2.1.1.Staff Home Page</h4>
+                    <p>When a user clicks the "Staff Mode" button, the system displays a "Name Input Page," requiring the staff member (instructor or client) to enter their name before accessing Staff Mode to view and rate the model.</p>
+                    <figure className="manual-figure">
+                        <img src={images["2.2.1-entername"]} alt="entername" />
+                    </figure>
+                    <p>
+                        Once the name is submitted, the user is taken to the Staff Mode homepage, shown below.
+                    </p>
+                    <figure className="manual-figure">
+                        <img src={images["2.2.1-staffhomepage"]} alt="staff Homepage" />
+                    </figure>
+                    <h4>Main elements:</h4>
+                    <ul className="manual-elements-list">
+                        <li>
+                            <img src={images["2.2.1-createmodel"]} alt="CreateModelb" className="inline-icon" />
+                            {" "}/{" "}
+                            <img src={images["2.2.1-openmodel"]} alt="OpenModelb" className="inline-icon" />
+                            {" "}– Same as in the standard homepage. See <a href="#landing-page">2.2.1 Landing Page (Home)</a> for details.
+                        </li>
+                        <li>
+                            <img src={images["2.2.1-markmodel"]} alt="MarkModel" className="inline-icon" />
+                            {" "}– Allows staff to open and grade an existing model. Clicking this button navigates to the marking/review interface, where staff can view the model and assign scores or feedback.
+                        </li>
+                        <li>
+                            <img src={images["2.2.1-staffchange"]} alt="Staff change" className="inline-icon" />
+                            {" "}– Once Staff Mode is activated, the staffmode button turns grey and displays "Staff mode: on", with the staff member's entered name shown beside it, confirming the current staff identity.
+                        </li>
+                    </ul>
+
 
 
                     <h3 id="editor-goals">2.2.2.Editor — Enter Goals / Arrange Hierarchy</h3>
