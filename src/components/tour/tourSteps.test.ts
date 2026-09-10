@@ -1,5 +1,6 @@
-import {readFileSync} from "node:fs";
-import {execSync} from "node:child_process";
+import {readdirSync, readFileSync} from "node:fs";
+import {dirname, join, resolve} from "node:path";
+import {fileURLToPath} from "node:url";
 import {describe, expect, it} from "vitest";
 import {
 	anchorSelector,
@@ -23,24 +24,37 @@ import {
 // rather than trusted: every anchor a step names must actually be rendered
 // somewhere in the app, and every anchor the app renders must be used.
 
-const sourceFiles = (): string[] =>
-	execSync(
-		`grep -rl "${TOUR_ANCHOR_ATTRIBUTE}" src --include=*.tsx || true`,
-		{encoding: "utf8"}
-	)
-		.split("\n")
-		.filter(Boolean);
+// use fs instead of grep, grep isn't on windows. also work out src/ from this
+// file so it doesn't matter where you run vitest from
+const SRC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+const sourceFiles = (directory: string = SRC_ROOT): string[] =>
+	readdirSync(directory, {withFileTypes: true}).flatMap((entry) => {
+		const path = join(directory, entry.name);
+		if (entry.isDirectory()) {
+			return sourceFiles(path);
+		}
+		return entry.name.endsWith(".tsx") ? [path] : [];
+	});
+
+// build these from the constant, otherwise renaming it makes the check match
+// nothing and still pass. new regex each call because /g remembers lastIndex
+const literalAnchor = () =>
+	new RegExp(`${TOUR_ANCHOR_ATTRIBUTE}="([^"{]+)"`, "g");
+
+const templatedTabAnchor = () =>
+	new RegExp(`${TOUR_ANCHOR_ATTRIBUTE}=\\{\`tab-\\$\\{`);
 
 const anchorsInSource = (): Set<string> => {
 	const found = new Set<string>();
 	sourceFiles().forEach((file) => {
 		const text = readFileSync(file, "utf8");
 		// Literal attributes: data-tour="goal-tabs"
-		[...text.matchAll(/data-tour="([^"{]+)"/g)].forEach((match) =>
+		[...text.matchAll(literalAnchor())].forEach((match) =>
 			found.add(match[1])
 		);
 		// Template attributes: data-tour={`tab-${...}`}
-		if (/data-tour=\{`tab-\$\{/.test(text)) {
+		if (templatedTabAnchor().test(text)) {
 			CATEGORY_GUIDES.forEach((guide) => found.add(guide.anchor));
 		}
 	});
