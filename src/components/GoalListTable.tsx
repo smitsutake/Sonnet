@@ -180,7 +180,7 @@ const GoalListTable: React.FC<Props> = ({label, goals, setDraggedItem, groupSele
 	};
 
 	return (
-		<Table striped bordered hover>
+		<Table striped bordered hover data-tour="goal-table">
 			<thead>
 				<tr>
 					<th style={{width: '1px', whiteSpace: 'nowrap'}}>

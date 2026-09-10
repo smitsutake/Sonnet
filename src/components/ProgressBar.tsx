@@ -38,7 +38,7 @@ const ProgressBar = ({
     };
 
     return (
-        <div style={{
+        <div data-tour="progress-bar" style={{
             width: "auto",
             minWidth: "1280px",
             overflowY: "hidden",

@@ -80,9 +80,15 @@ const GoalList = React.forwardRef<HTMLDivElement, GoalListProps>(({setDraggedIte
             <div className={styles.tabContainer} ref={ref}>
                 <Tab.Container activeKey={activeKey ?? undefined}
                                onSelect={(label: string | null) => handleSelect(label as Label ?? "Be")}>
-                    <Nav variant="tabs" className="flex-row">
+                    <Nav variant="tabs" className="flex-row" data-tour="goal-tabs">
                         {[...tabs.values()].map((tab) => (
-                            <Nav.Item key={tab.label} className={styles.navItem}>
+                            <Nav.Item
+                                key={tab.label}
+                                className={styles.navItem}
+                                // Anchor for the guided tour. See
+                                // components/tour/tourSteps.ts.
+                                data-tour={`tab-${tab.label.toLowerCase()}`}
+                            >
                                 <Nav.Link eventKey={tab.label}
                                           active={activeKey === tab.label}
                                           className={`${styles.navLink} ${(activeKey === tab.label) ? "bg-primary" : ""}`}>

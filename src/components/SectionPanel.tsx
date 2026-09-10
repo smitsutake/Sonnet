@@ -283,6 +283,8 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         onDrop={handleDrop}
         onDragOver={(event) => event.preventDefault()}
         ref={sectionTwoRef}
+        // Anchor for the guided tour, see components/tour/tourSteps.ts.
+        data-tour="hierarchy-panel"
       >
         <Tree
 

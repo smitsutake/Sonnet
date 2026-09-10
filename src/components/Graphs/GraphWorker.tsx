@@ -851,6 +851,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                         <div
                             id={GRAPH_DIV_ID}
                             data-cy="graph-canvas"
+                            data-tour="model-canvas"
                             ref={divGraph}
                             tabIndex={0}
                             style={{

@@ -10,6 +10,7 @@ import {isChrome, isEdge, isOpera} from "react-device-detect";
 import ResetGraphButton from "../Graphs/ResetGraphButton.tsx";
 
 import HomeButton from "./HomeButton.tsx";
+import TourButton from "../tour/TourButton.tsx";
 
 type ProjectEditHeaderProps = {
 	showGoalSection: boolean;
@@ -40,7 +41,8 @@ const ProjectEditHeader: React.FC<ProjectEditHeaderProps> = ({
                         <ResetGraphButton variant="outline-primary" className="ms-3"/>
                     </Col>
                     <Col className="d-flex flex-column flex-sm-row gap-2 justify-content-end align-items-center">
-                        <ButtonGroup>
+                        <TourButton className="me-2"/>
+                        <ButtonGroup data-tour="save-export">
                             {/* Pass showGraphSection to ExportFileButton to control enablement */}
                             <ExportFileButton showGraphSection={showGraphSection}/>
                             {isBrowserSupported && <SaveFileButton/>}
