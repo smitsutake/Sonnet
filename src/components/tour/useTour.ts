@@ -1,6 +1,7 @@
 import {useCallback, useEffect} from "react";
 import {driver, DriveStep} from "driver.js";
 import "driver.js/dist/driver.css";
+import "./tourTheme.css";
 import {anchorSelector, TOUR_STEPS, TourStep} from "./tourSteps.ts";
 
 // ============================================================
@@ -77,6 +78,8 @@ export const useTour = () => {
 			nextBtnText: "Next",
 			prevBtnText: "Back",
 			doneBtnText: "Done",
+			// scopes tourTheme.css to this popover only
+			popoverClass: "ammber-tour",
 			steps: present.map(toDriveStep),
 			// also fires when the user presses Done or clicks the overlay, so we
 			// don't keep a handle to something that's already gone

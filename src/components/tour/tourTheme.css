@@ -1,0 +1,114 @@
+/* guide colours.
+   #0d6efd is bootstrap's primary, which is already the blue of the active goal
+   tab, Add Group and the Save/Export/Reset buttons - taking it from the app
+   instead of picking one means the guide follows if the app gets restyled.
+   everything is scoped under .ammber-tour (the popoverClass useTour passes to
+   driver.js) so we're not restyling driver.js globally. */
+
+.driver-popover.ammber-tour {
+    --ammber-tour-accent: #0d6efd;
+    --ammber-tour-accent-dark: #0b5ed7;
+    --ammber-tour-ink: #212529;
+    --ammber-tour-muted: #6c757d;
+
+    max-width: 340px;
+    padding: 18px 20px 16px;
+    border-top: 3px solid var(--ammber-tour-accent);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgb(13 110 253 / 18%), 0 1px 3px rgb(0 0 0 / 12%);
+}
+
+.driver-popover.ammber-tour .driver-popover-title {
+    color: var(--ammber-tour-ink);
+    font-size: 17px;
+    padding-right: 24px;
+}
+
+.driver-popover.ammber-tour .driver-popover-description {
+    color: var(--ammber-tour-ink);
+    line-height: 1.6;
+}
+
+/* the "watch out for" line at the end of each category step */
+.driver-popover.ammber-tour .driver-popover-description em {
+    color: var(--ammber-tour-muted);
+    font-style: italic;
+}
+
+.driver-popover.ammber-tour .driver-popover-progress-text {
+    color: var(--ammber-tour-muted);
+    font-size: 12px;
+}
+
+.driver-popover.ammber-tour .driver-popover-footer-btn {
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+}
+
+/* Next / Done is the thing we're suggesting, so it gets the accent */
+.driver-popover.ammber-tour .driver-popover-next-btn {
+    background-color: var(--ammber-tour-accent);
+    border-color: var(--ammber-tour-accent);
+    color: #fff;
+}
+
+.driver-popover.ammber-tour .driver-popover-next-btn:hover,
+.driver-popover.ammber-tour .driver-popover-next-btn:focus {
+    background-color: var(--ammber-tour-accent-dark);
+    border-color: var(--ammber-tour-accent-dark);
+    color: #fff;
+}
+
+.driver-popover.ammber-tour .driver-popover-prev-btn {
+    background-color: #fff;
+    border-color: var(--ammber-tour-accent);
+    color: var(--ammber-tour-accent);
+}
+
+.driver-popover.ammber-tour .driver-popover-prev-btn:hover,
+.driver-popover.ammber-tour .driver-popover-prev-btn:focus {
+    background-color: rgb(13 110 253 / 8%);
+    color: var(--ammber-tour-accent-dark);
+}
+
+/* driver.js does all:unset on its buttons which kills the focus ring, so
+   keyboard users get nothing. put bootstrap's back. */
+.driver-popover.ammber-tour .driver-popover-footer-btn:focus-visible,
+.driver-popover.ammber-tour .driver-popover-close-btn:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgb(13 110 253 / 25%);
+}
+
+.driver-popover.ammber-tour .driver-popover-close-btn:hover,
+.driver-popover.ammber-tour .driver-popover-close-btn:focus {
+    color: var(--ammber-tour-accent);
+}
+
+/* the arrow is the border of a 0-sized box so only the edge facing the popover
+   shows, and which edge that is depends on the side. the one sitting above the
+   popover touches the blue top border, the others touch white. */
+.driver-popover.ammber-tour .driver-popover-arrow-side-bottom {
+    border-bottom-color: var(--ammber-tour-accent);
+}
+
+.driver-popover.ammber-tour .driver-popover-arrow-side-top {
+    border-top-color: #fff;
+}
+
+.driver-popover.ammber-tour .driver-popover-arrow-side-left {
+    border-left-color: #fff;
+}
+
+.driver-popover.ammber-tour .driver-popover-arrow-side-right {
+    border-right-color: #fff;
+}
+
+/* the hole in the overlay has no edge by default so it reads as a gap rather
+   than a highlight */
+.driver-active .driver-active-element {
+    outline: 2px solid var(--ammber-tour-accent, #0d6efd);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
