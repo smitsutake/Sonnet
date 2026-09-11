@@ -1,4 +1,4 @@
-import {useCallback} from "react";
+import {useCallback, useEffect} from "react";
 import {driver, DriveStep} from "driver.js";
 import "driver.js/dist/driver.css";
 import {anchorSelector, TOUR_STEPS, TourStep} from "./tourSteps.ts";
@@ -35,6 +35,17 @@ export const visibleSteps = (
 ): TourStep[] =>
 	steps.filter((step) => !step.anchor || isPresent(anchorSelector(step.anchor)));
 
+// the overlay lives on document.body so react doesn't clean it up - keep the
+// instance so we can. module scope because there's only ever one overlay.
+let activeTour: ReturnType<typeof driver> | undefined;
+
+export const stopTour = (): void => {
+	activeTour?.destroy();
+	activeTour = undefined;
+};
+
+export const isTourRunning = (): boolean => activeTour !== undefined;
+
 export const useTour = () => {
 	const startTour = useCallback((steps: TourStep[] = TOUR_STEPS) => {
 		const present = visibleSteps(
@@ -46,15 +57,30 @@ export const useTour = () => {
 			return;
 		}
 
-		driver({
+		// defensive - you can't currently reach this with a mouse or keyboard
+		// because the overlay swallows the click, but it's one line
+		stopTour();
+
+		const tour = driver({
 			showProgress: true,
 			allowClose: true,
 			nextBtnText: "Next",
 			prevBtnText: "Back",
 			doneBtnText: "Done",
 			steps: present.map(toDriveStep),
-		}).drive();
+			// also fires when the user presses Done or clicks the overlay, so we
+			// don't keep a handle to something that's already gone
+			onDestroyed: () => {
+				activeTour = undefined;
+			},
+		});
+
+		activeTour = tour;
+		tour.drive();
 	}, []);
 
-	return {startTour};
+	// this is the bit that cleans up the overlay when the editor unmounts
+	useEffect(() => stopTour, []);
+
+	return {startTour, stopTour};
 };
