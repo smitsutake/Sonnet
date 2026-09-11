@@ -19,7 +19,7 @@ const TourButton: React.FC<TourButtonProps> = ({className}) => {
 
 	return (
 		<Button
-			variant="outline-secondary"
+			variant="outline-primary"
 			className={className}
 			onClick={() => startTour(TOUR_STEPS)}
 			title="Walk through how to build a motivational model"
