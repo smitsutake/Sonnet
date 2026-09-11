@@ -63,8 +63,8 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     // anyone opening a file that already carries feedback (see the matching
     // showFeedbackSection check in SectionPanel). Neither of them is editing
     // the model, so the shape palette and styling tools have no use either way.
-    const {reviewerName, fileHadFeedback} = useFeedbackContext();
-    const isReviewing = reviewerName !== null || fileHadFeedback;
+    const {reviewerName, fileHadFeedback, isReviewMode} = useFeedbackContext();
+    const isReviewing = isReviewMode && (reviewerName !== null || fileHadFeedback);
     const treeIdsRef = useRef(treeIds);
     treeIdsRef.current = treeIds;
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.

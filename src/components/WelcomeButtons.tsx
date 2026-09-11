@@ -54,13 +54,16 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	const [jsonFile, setJsonFile] = useState<File | null>(null);
 	const [isJsonDragOver, setIsJsonDragOver] = useState(false);
 	const [errorModal, setErrorModal] = useState<ErrorModalProps>(defaultModalState);
+	// Which button opened the file-drop flow, so Upload knows whether to allow
+	// feedback/marking access for the model it lands on.
+	const [openIntent, setOpenIntent] = useState<"open" | "review" | "mark">("open");
 
 	const jsonFileRef = useRef<HTMLInputElement>(null);
 
 	const navigate = useNavigate();
 
 	const {dispatch} = useFileContext();
-	const {loadItems, reviewerName} = useFeedbackContext();
+	const {loadItems, reviewerName, setReviewMode} = useFeedbackContext();
 
 	// Pulls the feedback block off a freshly parsed file and hands it to the
 	// feedback session. Called for every open, not just teaching-staff opens,
@@ -78,6 +81,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 		// A brand new model carries no feedback, and must not inherit whatever
 		// was loaded from a file earlier in this session.
 		loadItems(null);
+		setReviewMode(false);
 	};
 
 	const handleJSONFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -239,7 +243,10 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 							variant="primary"
 							size="lg"
 							disabled={!jsonFile ? true : false}
-							onClick={() => navigate("/projectEdit")}
+							onClick={() => {
+								setReviewMode(openIntent !== "open");
+								navigate("/projectEdit");
+							}}
 						>
 							Upload
 						</Button>
@@ -263,10 +270,29 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 					<Button
 						variant="primary"
 						size="lg"
-						onClick={() => setIsDragging(true)}
+						onClick={() => {
+							setOpenIntent("open");
+							setIsDragging(true);
+						}}
 					>
 						Open Model
 					</Button>
+
+					{/* Review Model is only available through this button, so a model
+					    opened via Open Model never exposes feedback. Staff mode has
+					    Mark model instead, so this is hidden there. */}
+					{reviewerName === null && (
+						<Button
+							variant="primary"
+							size="lg"
+							onClick={() => {
+								setOpenIntent("review");
+								setIsDragging(true);
+							}}
+						>
+							Review Model
+						</Button>
+					)}
 
 					{/* Only in staff mode. Create and Open are unchanged; this is
 					    the one extra thing staff can do, so it sits alongside them
@@ -275,7 +301,10 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 						<Button
 							variant="primary"
 							size="lg"
-							onClick={() => setIsDragging(true)}
+							onClick={() => {
+								setOpenIntent("mark");
+								setIsDragging(true);
+							}}
 						>
 							Mark model
 						</Button>

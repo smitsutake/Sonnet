@@ -27,6 +27,12 @@ export type FeedbackContextProps = {
 	// read-only view for a student opening a reviewed model.
 	fileHadFeedback: boolean;
 
+	// True only when the current model was opened via the "Review" or "Mark
+	// model" button. "Open Model" never sets this, so feedback/marking stay
+	// unreachable there even if the file carries feedback or staff mode is on.
+	isReviewMode: boolean;
+	setReviewMode: (isReviewMode: boolean) => void;
+
 	// id of the box waiting for a goal to be clicked, or null.
 	linkingItemId: string | null;
 	setLinkingItemId: (id: string | null) => void;

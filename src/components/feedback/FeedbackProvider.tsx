@@ -28,6 +28,7 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 	const [reviewerName, setReviewerName] = useState<string | null>(null);
 	const [items, setItems] = useState<FeedbackItem[]>([]);
 	const [fileHadFeedback, setFileHadFeedback] = useState(false);
+	const [isReviewMode, setReviewMode] = useState(false);
 	const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const [grade, setGrade] = useState<GradeData | null>(null);
@@ -116,6 +117,8 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			toggleTarget,
 			loadItems,
 			fileHadFeedback,
+			isReviewMode,
+			setReviewMode,
 			linkingItemId,
 			setLinkingItemId,
 			selectedItemId,
@@ -136,6 +139,7 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			toggleTarget,
 			loadItems,
 			fileHadFeedback,
+			isReviewMode,
 			linkingItemId,
 			selectedItemId,
 			grade,

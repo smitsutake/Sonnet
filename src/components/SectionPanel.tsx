@@ -66,11 +66,13 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
   const [draggedItem, setDraggedItem] = useState<TreeGoal | null>(null);
   // Simply store ids of all items in the tree for fast check instead of recursive search
     const {dispatch, tree} = useFileContext();
-    const {reviewerName, items: feedbackItems, fileHadFeedback, selectedItemId} =
+    const {reviewerName, items: feedbackItems, fileHadFeedback, isReviewMode, selectedItemId} =
     useFeedbackContext();
     // The panel appears for a reviewer, and also for anyone opening a file that
     // already carries feedback so students can read the comments left for them.
-    const showFeedbackSection = reviewerName !== null || fileHadFeedback;
+    // Gated on isReviewMode too, so a model opened via "Open Model" never shows
+    // feedback/marking even if it carries feedback or staff mode is on.
+    const showFeedbackSection = isReviewMode && (reviewerName !== null || fileHadFeedback);
 
   const [groupSelected, setGroupSelected] = useState<TreeGoal[]>([]);
 
