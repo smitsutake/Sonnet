@@ -67,6 +67,7 @@ const UserManualWeb: React.FC = () => {
                                         <li><a href="#render-navbar">2.2.3.2.Navigation Bar</a></li>
                                         <li><a href="#render-hierarchy-panel">2.2.3.3.Hierarchy Panel</a></li>
                                         <li><a href="#model-panel">2.2.3.4.Model Panel</a></li>
+                                        <li><a href="#feedback-panel">2.2.3.5 Feedback Panel (Staff Review)</a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -97,6 +98,15 @@ const UserManualWeb: React.FC = () => {
                                 <li><a href="#exporting">3.4.Exporting the model</a></li>
                                 <li><a href="#saving">3.5.Saving the model</a></li>
                                 <li><a href="#opening">3.6.Opening a saved model</a></li>
+                                <li>
+                                    <a href="#staffm">3.7.Staff Mode Instruction</a>
+                                    <ul className="sub-nav">
+                                        <li><a href="#feedbacking">3.7.1.Adding feedback comments to model</a></li>
+                                        <li><a href="#grading">3.7.2.Grading a model</a></li>
+                                    </ul>
+                                </li>
+
+
                             </ul>
                         </li>
                         <li className="nav-item">
@@ -422,6 +432,41 @@ const UserManualWeb: React.FC = () => {
                         <br />
                         ⋄ Use the Zoom Toolbar to adjust the view of your model. You can zoom in to see details, fit the model to the screen for an overview, or zoom out to see the overall structure
                     </div>
+                    <h4 id="feedback-panel">2.2.3.5 Feedback Panel (Staff Review)</h4>
+                    <p>
+                        When AMMBER is opened in staff review mode, a <strong>Feedback panel</strong> appears
+                        on the right-hand side of the editor, alongside the goal list or hierarchy view. It
+                        remains visible across both the "Enter Goals / Arrange Hierarchy" and "Arrange
+                        Hierarchy / Render Model" stages, allowing staff to leave comments on a student's
+                        model at any point while reviewing it.
+                    </p>
+                    <p>
+                        The panel header shows who is currently reviewing the model (e.g. "Reviewing as
+                        staff1"). If no comments have been added yet, a placeholder message "No feedback
+                        yet. Use + to add the first comment." is displayed.
+                    </p>
+
+                    <figure className="manual-figure">
+                        <img src={images["4.1-markmodelpage"]} alt="markmodelpage" />
+
+                    </figure>
+                    <figure className="manual-figure">
+                        <img src={images["4.1-markmodelpage2"]} alt="markmodelpage2" />
+
+                    </figure>
+                    <h4>New elements in the Feedback Panel:</h4>
+                    <ul className="manual-elements-list">
+                        <li>
+                            <img src={images["4.1-addfeedbackicon"]} alt="Addfeedbackbutton" className="inline-icon" />
+                            {" "}– Adds a new comment to the panel.
+                        </li>
+                        <li>
+                            <img src={images["4.1-gradeicon"]} alt="gradebutton" className="inline-icon" />
+                            {" "}– Grading the model.
+                        </li>
+                    </ul>
+
+
 
 
                     <h1 id="core-features">Chapter 3:Core Features</h1>
@@ -617,6 +662,113 @@ const UserManualWeb: React.FC = () => {
                             <img src={images["3.2.1-edit"]} alt="edit" />
                         </figure>
                     </ol>
+                    <h2 id="staffm">3.7.Staff Mode Instruction</h2>
+                    <ol>
+                        <li>
+                            Click <img src={images["2.2.1-staffmode"]} alt="Staffmode" className="inline-icon" />
+                            {" "} in the top-right corner of the homepage.
+                        </li>
+                        <li>Enter your name to enter Staff Mode.</li>
+                        <figure className="manual-figure">
+                            <img src={images["2.2.1-entername"]} alt="Entername" />
+                        </figure>
+                        <li>Now you are in Staff mode page.</li>
+                        <figure className="manual-figure">
+                            <img src={images["2.2.1-staffhomepage"]} alt="staffppage" />
+                        </figure>
+                    </ol>
+
+                    <h3 id="feedbacking">3.7.1.Adding feedback comments to model</h3>
+                    <ol>
+                        <li>After enter staff page,click <img src={images["2.2.1-markmodel"]} alt="markmodel" className="inline-icon" /> .</li>
+
+                        <li>
+                            Upload or drag and drop the JSON file into the drop zone, then click
+                            {" "}<img src={images["3.6-uploadicon"]} alt="Upload button" className="inline-icon" />
+                            {" "} to confirm.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-dropmodel"]} alt="dropmodel" />
+                        </figure>
+                        <li>Once in the feedback panel interface, click "Arrange Hierarchy / Render Model" to view the complete model diagram.</li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-arrangehier"]} alt="arrangehier" />
+                        </figure>
+                        <li>
+                            Click the <img src={images["4.1-addfeedbackicon"]} alt="Add feedback button" className="inline-icon" />
+                            {" "}button under "Feedback" to create a new feedback entry (multiple entries can be created at once).
+                        </li>
+                        <li>Enter your feedback in the text box.</li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-newfeedback"]} alt="Feedbackcomment" />
+                        </figure>
+                        <li>
+                            Click <img src={images["4.1-linkgoalicon"]} alt="Link goal button" className="inline-icon" />
+                            {" "} to link the feedback to the corresponding goal.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-linkgoal"]} alt="linkgoal" />
+                        </figure>
+                        <li>
+                            Click <img src={images["4.1-deleteicon"]} alt="Delete button" className="inline-icon" />
+                            {" "}to remove the feedback.
+                        </li>
+                    </ol>
+
+                    <h3 id="grading">3.7.2.Grading a model</h3>
+                    <ol>
+                        <li>After enter staff page,click <img src={images["2.2.1-markmodel"]} alt="markmodel" className="inline-icon" /> .</li>
+
+                        <li>
+                            Upload or drag and drop the JSON file into the drop zone, then click
+                            {" "}<img src={images["3.6-uploadicon"]} alt="Upload button" className="inline-icon" />
+                            {" "} to confirm.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-dropmodel"]} alt="dropmodel" />
+                        </figure>
+                        <li>Once in the feedback panel interface, click "Arrange Hierarchy / Render Model" to view the complete model diagram.</li>
+                        <figure className="manual-figure">
+                            <img src={images["4.1-arrangehier"]} alt="arrangehier" />
+                        </figure>
+                        <li>
+                            Click the <img src={images["4.1-gradeicon"]} alt="Grade button" className="inline-icon" />
+                            {" "} button in the top-right corner to grade the model.
+                        </li>
+                        <li>
+                            Enter the "Total Score," "Component Score," and "Overall Feedback," then click
+                            "Save Grade" to save the score.
+                        </li>
+                        <figure className="manual-figure">
+
+                            <img src={images["4.1-gradingpage"]} alt="Gradingpange" />
+                        </figure>
+                        <li>After saving the score, the button bar in the top-right corner will change slightly.</li>
+                        <figure className="manual-figure">
+
+                            <img src={images["4.1-pageaftergeade"]} alt="newpage" />
+                        </figure>
+                        <li>
+                            Click <img src={images["4.1-yourgradeicon"]} alt="Your Grade button" className="inline-icon" />
+                            {" "} to view the score.
+                        </li>
+                        <figure className="manual-figure">
+
+                            <img src={images["4.1-yourgrade"]} alt="ygrade" />
+                        </figure>
+
+                        <li>
+                            Click <img src={images["4.1-editgradeicon"]} alt="Edit Grade button" className="inline-icon" />
+                            {" "}  to modify the score.
+                        </li>
+                        <figure className="manual-figure">
+
+                            <img src={images["4.1-editgrade"]} alt="egrade" />
+                        </figure>
+                    </ol>
+
+
+
 
                     <hr />
 
