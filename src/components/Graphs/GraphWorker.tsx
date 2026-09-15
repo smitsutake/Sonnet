@@ -695,19 +695,18 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 }
             />
             <Container>
-                {/* The sidebar sits to the left of the canvas so that feedback
-                    arrows, which run from the panel on the far right to shapes
-                    on the canvas, do not have to cross it. Hidden entirely while
-                    reviewing: a reviewer only reads and comments on the model. */}
+                {/* The sidebar sits to the right of the canvas. Hidden entirely
+                    while reviewing: a reviewer only reads and comments on the
+                    model. */}
                 <Row className="row">
+                    <Col md={isReviewing ? 12 : 10}>
+                        <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
+                    </Col>
                     {!isReviewing && (
                         <Col md={2}>
                             <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
                         </Col>
                     )}
-                    <Col md={isReviewing ? 12 : 10}>
-                        <div id={GRAPH_DIV_ID} data-cy="graph-canvas" ref={divGraph} tabIndex={0} style={{outline: 'none'}} />
-                    </Col>
                 </Row>
                 {(cluster.ClusterGoals.length > 0) && (!hasFunctionalGoalInCluster) && (
                     <WarningMessage message="No functional goals found" />
