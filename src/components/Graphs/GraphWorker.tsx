@@ -682,9 +682,18 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
             }
         };
 
+        // Global mouseup clears the drag source, regardless of where the drag ends
+        const handleMouseUp = () => {
+            window.__dragSource = null;
+            setIsDragOver(false);
+        };
+
         document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
 // Keyboard shortcuts: Save, Export, Select All, Duplicate
@@ -858,13 +867,6 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                                 border: isDragOver ? '3px dashed #4A90D9' : 'none',
                                 transition: 'border 0.2s ease',
                             }}
-                            onDragEnter={() => setIsDragOver(true)}
-                            onDragLeave={(e) => {
-                                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                                    setIsDragOver(false);
-                                }
-                            }}
-                            onDrop={() => setIsDragOver(false)}
                         />
                     </Col>
                     <Col md={2}>
@@ -896,5 +898,6 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
 };
 
 // ---------------------------------------------------------------------------
+/* Hide maxGraph's default drag preview (black dashed border) */
 
 export default GraphWorker;
