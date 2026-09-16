@@ -120,21 +120,9 @@ const SidebarItems = ({graph, className=""}: SidebarItemsProps) => {
             symbol.imagePath
         );
         sidebarItem.style.width = (symbol.type === "Stakeholder") ? "30px" : "60px";
-
+        // Mark drag source as sidebar on mousedown; cleared globally on mouseup
         sidebarItem.addEventListener('mousedown', () => {
             window.__dragSource = 'sidebar';
-        });
-
-        sidebarItem.addEventListener('mouseup', () => {
-            setTimeout(() => {
-                window.__dragSource = null;
-            }, 100);
-        });
-
-        sidebarItem.addEventListener('mouseleave', () => {
-            setTimeout(() => {
-                window.__dragSource = null;
-            }, 100);
         });
 
         gestureUtils.makeDraggable(sidebarItem, graph, dragAndDropHandler);
