@@ -190,3 +190,9 @@ export const TOUR_STEPS: TourStep[] = [
 
 export const stepsForStage = (stage: TourStep["stage"]): TourStep[] =>
 	TOUR_STEPS.filter((step) => step.stage === stage);
+
+// step 9 - where the model half starts. the first 8 are all goal list stuff.
+const GOAL_LIST_STAGES: TourStep["stage"][] = ["intro", "goals"];
+
+export const firstStepAfterGoals = (): TourStepId | undefined =>
+	TOUR_STEPS.find((step) => !GOAL_LIST_STAGES.includes(step.stage))?.id;

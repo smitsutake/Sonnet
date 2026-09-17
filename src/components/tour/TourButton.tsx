@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
 import {useTour} from "./useTour.ts";
-import {TOUR_STEPS} from "./tourSteps.ts";
+import {firstStepAfterGoals, TOUR_STEPS} from "./tourSteps.ts";
 
 // Starts the guided tour.
 //
@@ -12,16 +12,21 @@ import {TOUR_STEPS} from "./tourSteps.ts";
 
 type TourButtonProps = {
 	className?: string;
+	// true on the render model page - skip the goal list steps there
+	showGraphSection?: boolean;
 };
 
-const TourButton: React.FC<TourButtonProps> = ({className}) => {
+const TourButton: React.FC<TourButtonProps> = ({className, showGraphSection}) => {
 	const {startTour} = useTour();
 
 	return (
 		<Button
 			variant="outline-primary"
 			className={className}
-			onClick={() => startTour(TOUR_STEPS)}
+			onClick={() => startTour(
+				TOUR_STEPS,
+				showGraphSection ? firstStepAfterGoals() : undefined
+			)}
 			title="Walk through how to build a motivational model"
 		>
 			Guide

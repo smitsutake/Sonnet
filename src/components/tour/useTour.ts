@@ -2,7 +2,7 @@ import {useCallback, useEffect} from "react";
 import {driver, DriveStep} from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tourTheme.css";
-import {anchorSelector, TOUR_STEPS, TourStep} from "./tourSteps.ts";
+import {anchorSelector, TOUR_STEPS, TourStep, TourStepId} from "./tourSteps.ts";
 
 // ============================================================
 // Running the guided tour
@@ -48,7 +48,10 @@ export const stopTour = (): void => {
 export const isTourRunning = (): boolean => activeTour !== undefined;
 
 export const useTour = () => {
-	const startTour = useCallback((steps: TourStep[] = TOUR_STEPS) => {
+	const startTour = useCallback((
+		steps: TourStep[] = TOUR_STEPS,
+		startAtId?: TourStepId
+	) => {
 		const present = visibleSteps(
 			steps,
 			(selector) => document.querySelector(selector) !== null
@@ -57,6 +60,11 @@ export const useTour = () => {
 		if (present.length === 0) {
 			return;
 		}
+
+		// index in the filtered list, not the full one. -1 if it got filtered out
+		const startAt = startAtId
+			? Math.max(0, present.findIndex((step) => step.id === startAtId))
+			: 0;
 
 		// defensive - you can't currently reach this with a mouse or keyboard
 		// because the overlay swallows the click, but it's one line
@@ -79,7 +87,7 @@ export const useTour = () => {
 		});
 
 		activeTour = tour;
-		tour.drive();
+		tour.drive(startAt);
 	}, []);
 
 	// this is the bit that cleans up the overlay when the editor unmounts

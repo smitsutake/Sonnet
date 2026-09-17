@@ -7,6 +7,7 @@ import {
 	CATEGORY_GUIDES,
 	TOUR_ANCHOR_ATTRIBUTE,
 	TOUR_STEPS,
+	firstStepAfterGoals,
 	stepsForStage,
 } from "./tourSteps";
 
@@ -108,6 +109,19 @@ describe("tour content", () => {
 			expect(step.title.trim()).not.toBe("");
 			expect(step.body.trim()).not.toBe("");
 		});
+	});
+
+	it("knows where the model half of the guide starts", () => {
+		// what the Guide button jumps to on the render model page
+		const id = firstStepAfterGoals();
+		const step = TOUR_STEPS.find((s) => s.id === id);
+
+		expect(step).toBeDefined();
+		expect(["hierarchy", "model"]).toContain(step!.stage);
+
+		// and everything before it really is goal list stuff
+		const before = TOUR_STEPS.slice(0, TOUR_STEPS.findIndex((s) => s.id === id));
+		before.forEach((s) => expect(["intro", "goals"]).toContain(s.stage));
 	});
 
 	it("uses unique step ids", () => {

@@ -32,8 +32,46 @@ const steps: TourStep[] = [
 	{id: "intro", title: "Intro", body: "Body", stage: "intro"},
 ];
 
+// a stand-in for the real list: a few goal steps then the model half
+const fullSteps: TourStep[] = [
+	{id: "intro", title: "Intro", body: "b", stage: "intro"},
+	{id: "goal-tabs", title: "Tabs", body: "b", stage: "goals"},
+	{id: "add-goal", title: "Adding", body: "b", stage: "goals"},
+	{id: "hierarchy", title: "Hierarchy", body: "b", stage: "hierarchy"},
+	{id: "model", title: "Model", body: "b", stage: "model"},
+];
+
 afterEach(() => {
 	tours.length = 0;
+});
+
+describe("starting part-way through", () => {
+	it("starts at the top when no step is named", () => {
+		const {result, unmount} = renderHook(() => useTour());
+		result.current.startTour(fullSteps);
+
+		expect(tours[0].drive).toHaveBeenCalledWith(0);
+		unmount();
+	});
+
+	it("starts at the named step", () => {
+		// pressing Guide on the render model page skips the goal list half
+		const {result, unmount} = renderHook(() => useTour());
+		result.current.startTour(fullSteps, "hierarchy");
+
+		expect(tours[0].drive).toHaveBeenCalledWith(3);
+		unmount();
+	});
+
+	it("falls back to the top if that step got filtered out", () => {
+		// nothing in jsdom renders the anchors, but these steps have none, so
+		// they all survive - ask for one that isn't in the list at all
+		const {result, unmount} = renderHook(() => useTour());
+		result.current.startTour(fullSteps, "not-a-step");
+
+		expect(tours[0].drive).toHaveBeenCalledWith(0);
+		unmount();
+	});
 });
 
 describe("tour lifecycle", () => {
