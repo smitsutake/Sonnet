@@ -1,6 +1,7 @@
 import {useEffect, useRef} from "react";
 import {anchorSelector, TOUR_STEPS} from "./tourSteps.ts";
 import {useTour} from "./useTour.ts";
+import {shouldOpenAutomatically} from "./tourPolicy.ts";
 
 // open the guide when you enter the editor, since the Guide button is easy to
 // miss. can't start it on mount though - the anchors aren't in the dom yet, so
@@ -13,7 +14,9 @@ const GIVE_UP_AFTER_MS = 5000;
 // it always "resolves" and we'd start too early
 const READY_ANCHOR = TOUR_STEPS.find((step) => step.anchor)?.anchor;
 
-export const useAutoTour = (enabled: boolean = true): void => {
+export const useAutoTour = (
+	enabled: boolean = shouldOpenAutomatically()
+): void => {
 	const {startTour} = useTour();
 	// once per visit to the editor, not once per re-render
 	const alreadyOpened = useRef(false);
