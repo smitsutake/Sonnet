@@ -4,11 +4,11 @@ import {JSONData, useFileContext} from "../context/FileProvider";
 import ErrorModal, {ErrorModalProps} from "../ErrorModal";
 import {returnFocusToGraph} from "../utils/GraphUtils";
 import {useFeedbackContext} from "../feedback/feedbackContext";
-import {buildFeedbackData, hasGrade} from "../feedback/feedbackTypes";
+import {buildFeedbackData} from "../feedback/feedbackTypes";
 
 const SaveFileButton = () => {
 	const {setJsonFileHandle, treeData, tabData, goals} = useFileContext();
-	const {items: feedbackItems, reviewerName, fileHadFeedback, grade} =
+	const {items: feedbackItems, reviewerName, fileHadFeedback} =
 		useFeedbackContext();
 
 	const [errorModal, setErrorModal] = useState<ErrorModalProps>({
@@ -84,12 +84,7 @@ const SaveFileButton = () => {
 			const jsonData: JSONData = {
 				tabData: tabData,
 				treeData: treeData || [],
-				feedback: {
-					...buildFeedbackData(feedbackItems, wasReviewed || hasGrade(grade)),
-					// Omitted rather than written as null, so an ungraded file
-					// keeps the shape it had before grading existed.
-					...(hasGrade(grade) && grade ? {grade} : {}),
-				},
+				feedback: buildFeedbackData(feedbackItems, wasReviewed),
 			};
 			const json = JSON.stringify(jsonData);
 			await writable.write(json);

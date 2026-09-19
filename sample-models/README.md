@@ -9,5 +9,3 @@ Two fixtures, used to check both sides of the backwards-compatibility rule.
 
 Both files share the same model, so they can be opened one after the other to
 compare behaviour.
-
-| `student-model-graded.json` | Carries feedback *and* a grade. Opening it should raise the grade overlay straight away, and leave a **Your Grade** button beside Export. |
