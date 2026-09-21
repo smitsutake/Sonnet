@@ -28,6 +28,7 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
 
     // Simplified logic: Export is only available when showGraphSection is true
     // This means user must be in "Render Model" interface (after clicking "Arrange Hierarchy / Render Model")
+
     const isModelReadyForExport = (): boolean => {
         // Only enable export when user is in Render Model interface
         // AND there are functional goals in the cluster
@@ -155,10 +156,26 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
         const svgString = serializer.serializeToString(svgElement);
 
         // Create a canvas element
+        //
+        // clientWidth/clientHeight are only meaningful for an element that is
+        // in the document. The annotated export works on a detached clone,
+        // where both read 0, which produced a zero-sized canvas and an empty
+        // PNG that the browser refused to download. Fall back to the width and
+        // height attributes, which the clone always carries.
+        const exportWidth =
+            svgElement.clientWidth || Number(svgElement.getAttribute('width')) || 0;
+        const exportHeight =
+            svgElement.clientHeight || Number(svgElement.getAttribute('height')) || 0;
+
+        if (exportWidth === 0 || exportHeight === 0) {
+            console.error('Could not determine export dimensions.');
+            return;
+        }
+
         const canvas = document.createElement('canvas');
         // Render at a higher pixel density for a sharper PNG export
-        canvas.width = Math.round(svgElement.clientWidth * PNG_EXPORT_SCALE);
-        canvas.height = Math.round(svgElement.clientHeight * PNG_EXPORT_SCALE);
+        canvas.width = Math.round(exportWidth * PNG_EXPORT_SCALE);
+        canvas.height = Math.round(exportHeight * PNG_EXPORT_SCALE);
 
         const context = canvas.getContext('2d');
         if (!context) {

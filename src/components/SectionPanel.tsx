@@ -2,6 +2,9 @@ import {Resizable, ResizeCallback} from "re-resizable";
 import React, {useEffect, useRef, useState} from "react";
 
 import ErrorModal from "./ErrorModal";
+import FeedbackPanel from "./feedback/FeedbackPanel";
+import FeedbackArrows from "./feedback/FeedbackArrows";
+import {useFeedbackContext} from "./feedback/feedbackContext";
 import GoalList from "./GoalList";
 import Tree from "./Tree";
 import {useFileContext} from "./context/FileProvider";
@@ -37,6 +40,10 @@ const INITIAL_PROPORTIONS = {
 
 const DEFAULT_HEIGHT = "800px";
 
+// Starting width of the feedback column. Fixed rather than proportional so
+// that turning feedback on does not reflow the three existing panels.
+const FEEDBACK_PANEL_WIDTH = 300;
+
 
 
 type SectionPanelProps = {
@@ -59,6 +66,13 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
   const [draggedItem, setDraggedItem] = useState<TreeGoal | null>(null);
   // Simply store ids of all items in the tree for fast check instead of recursive search
     const {dispatch, tree} = useFileContext();
+    const {reviewerName, items: feedbackItems, fileHadFeedback, isReviewMode, selectedItemId} =
+    useFeedbackContext();
+    // The panel appears for a reviewer, and also for anyone opening a file that
+    // already carries feedback so students can read the comments left for them.
+    // Gated on isReviewMode too, so a model opened via "Open Model" never shows
+    // feedback/marking even if it carries feedback or staff mode is on.
+    const showFeedbackSection = isReviewMode && (reviewerName !== null || fileHadFeedback);
 
   const [groupSelected, setGroupSelected] = useState<TreeGoal[]>([]);
 
@@ -200,26 +214,37 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
       const newParentWidth = parentRef.current.clientWidth - paddingX * 2;
       setParentWidth(newParentWidth);
 
+      // The hierarchy tree column is dropped entirely while the feedback
+      // panel is showing (see below), so the render section can claim the
+      // width that column would otherwise have used.
+      const remainingWidth = showFeedbackSection
+        ? newParentWidth - FEEDBACK_PANEL_WIDTH
+        : newParentWidth;
+
       if (showGoalSection && showGraphSection) {
         setSectionOneWidth(
           newParentWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionOne
         );
         setSectionThreeWidth(
-          newParentWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionThree
+          remainingWidth * INITIAL_PROPORTIONS.sectionsCombine.sectionThree
         );
-      } 
+      }
       else if (showGoalSection) {
         setSectionOneWidth(newParentWidth * INITIAL_PROPORTIONS.sectionOne);
-      } 
+      }
       else if (showGraphSection) {
-        setSectionThreeWidth(newParentWidth * INITIAL_PROPORTIONS.sectionThree);
-      } 
+        setSectionThreeWidth(
+          showFeedbackSection
+            ? remainingWidth
+            : newParentWidth * INITIAL_PROPORTIONS.sectionThree
+        );
+      }
       else {
         setSectionOneWidth(newParentWidth * INITIAL_PROPORTIONS.sectionOne);
-        setSectionThreeWidth(newParentWidth * INITIAL_PROPORTIONS.sectionThree);
+        setSectionThreeWidth(remainingWidth * INITIAL_PROPORTIONS.sectionThree);
       }
     }
-  }, [paddingX, showGoalSection, showGraphSection]); 
+  }, [paddingX, showGoalSection, showGraphSection, showFeedbackSection]);
 
   return (
     <div
@@ -228,6 +253,8 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         height: "100%",
         display: "flex",
         padding: paddingX,
+        // Positioning context for the feedback arrow overlay.
+        position: "relative",
       }}
       ref={parentRef}
       // onClick={() => setIsHintVisible(false)}
@@ -268,32 +295,37 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         />
       </Resizable>
 
-      {/* Cluster Hierarchy Section */}
-      <div
-        style={{
-          ...defaultStyle,
-          width: "100%",
-          minWidth: DEFINED_PROPORTIONS.minWidth,
-          minHeight: DEFAULT_HEIGHT,
-          height: DEFAULT_HEIGHT,
-          padding: "10px",
-          backgroundColor: "rgba(35, 144, 231, 0.1)",
-          overflow: "auto",
-        }}
-        onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}
-        ref={sectionTwoRef}
-      >
-        <Tree
+      {/* Cluster Hierarchy Section. Dropped entirely once the feedback panel
+          is showing: it is a drag-to-rearrange tool for building the model,
+          and a reviewer or a student reading feedback is never doing that --
+          the rendered model on the right already shows the same hierarchy. */}
+      {!showFeedbackSection && (
+        <div
+          style={{
+            ...defaultStyle,
+            width: "100%",
+            minWidth: DEFINED_PROPORTIONS.minWidth,
+            minHeight: DEFAULT_HEIGHT,
+            height: DEFAULT_HEIGHT,
+            padding: "10px",
+            backgroundColor: "rgba(35, 144, 231, 0.1)",
+            overflow: "auto",
+          }}
+          onDrop={handleDrop}
+          onDragOver={(event) => event.preventDefault()}
+          ref={sectionTwoRef}
+        >
+          <Tree
 
-          // existingItemIds={existingItemIds}
-          // setTreeIds={setTreeIds}
-          handleSynTableTree={handleSynTableTree}
-          // setExistingItemIds={setExistingItemIds}
-          existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
-          setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
-        />
-      </div>
+            // existingItemIds={existingItemIds}
+            // setTreeIds={setTreeIds}
+            handleSynTableTree={handleSynTableTree}
+            // setExistingItemIds={setExistingItemIds}
+            existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
+            setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
+          />
+        </div>
+      )}
 
       {/* Graph Render Section */}
       <Resizable
@@ -316,6 +348,32 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         {/* Third Panel Content */}
         <GraphWorker showGraphSection={showGraphSection}/>
       </Resizable>
+
+      {/* Feedback Section */}
+      {showFeedbackSection && (
+        <Resizable
+          handleClasses={{left: "left-handler"}}
+          enable={{left: true}}
+          style={{
+            ...defaultStyle,
+            display: "flex",
+          }}
+          defaultSize={{width: FEEDBACK_PANEL_WIDTH, height: "100%"}}
+          maxWidth={DEFINED_PROPORTIONS.maxWidth}
+          minWidth={DEFINED_PROPORTIONS.minWidth}
+          minHeight={DEFAULT_HEIGHT}
+        >
+          <FeedbackPanel/>
+        </Resizable>
+      )}
+
+      {showFeedbackSection && (
+        <FeedbackArrows
+          items={feedbackItems}
+          containerRef={parentRef}
+          selectedItemId={selectedItemId}
+        />
+      )}
     </div>
   );
 };
