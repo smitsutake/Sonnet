@@ -7,13 +7,16 @@ interface Props {
     title: string
     isOpen?: boolean
     children: React.ReactNode
+    // guide anchor. on the Card not the contents, so a collapsed panel still
+    // has something to point at.
+    tourAnchor?: string
 }
 
-export const CollapsibleSidebarCard = ({title, isOpen=false, children}: Props) => {
+export const CollapsibleSidebarCard = ({title, isOpen=false, children, tourAnchor}: Props) => {
     const [showCardContent, setShowCardContent] = useState(isOpen);
 
     return (
-        <Card>
+        <Card data-tour={tourAnchor}>
             <Card.Body className="p-1">
                 <Card.Subtitle onClick={() => setShowCardContent(!showCardContent)}
                                style={{cursor: "pointer"}}>

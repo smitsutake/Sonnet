@@ -19,14 +19,18 @@ import {anchorSelector, TOUR_STEPS, TourStep, TourStepId} from "./tourSteps.ts";
 // screen. A step with no anchor at all is always shown, centred.
 
 const toDriveStep = (step: TourStep): DriveStep => {
+	const popover = {
+		title: step.title,
+		description: step.body,
+		...(step.side ? {side: step.side} : {}),
+	};
+
 	if (!step.anchor) {
-		return {
-			popover: {title: step.title, description: step.body},
-		};
+		return {popover};
 	}
 	return {
 		element: anchorSelector(step.anchor),
-		popover: {title: step.title, description: step.body},
+		popover,
 	};
 };
 

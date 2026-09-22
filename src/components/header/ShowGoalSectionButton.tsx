@@ -8,11 +8,14 @@ interface ShowGoalSectionButtonProps {
     className?: string
     size?: "xs" | ButtonProps["size"]
     variant?: ButtonVariant
+    // guide anchor. passed in because this button is rendered in more than one
+    // place and only the one on the progress bar is on the guide.
+    tourAnchor?: string
 }
 
 type SizeAndStyle = Record<"size", ButtonProps["size"]> | Record<"style", Record<string, string>>
 
-const ShowGoalSectionButton = ({onClick, showGoalSection, className, size}: ShowGoalSectionButtonProps) => {
+const ShowGoalSectionButton = ({onClick, showGoalSection, className, size, tourAnchor}: ShowGoalSectionButtonProps) => {
     // Dynamically switch variant based on visibility state
     const variant = showGoalSection ? "secondary" : "primary";
 
@@ -31,6 +34,7 @@ const ShowGoalSectionButton = ({onClick, showGoalSection, className, size}: Show
         <Button variant={variant}
                 onClick={onClick}
                 className={className}
+                data-tour={tourAnchor}
                 {...sizeAndStyle}>
             {(showGoalSection) ? "Hide goal list" : "Show goal list"}
         </Button>

@@ -28,6 +28,9 @@ export type TourStep = {
 	// Which stage of the editor the step belongs to, so the tour can be run in
 	// sections rather than all at once.
 	stage: "intro" | "goals" | "hierarchy" | "model";
+	// which side the popover sits on. only needed for the toolbar - it's narrow
+	// and against the right edge, so driver.js puts the popover over it.
+	side?: "top" | "right" | "bottom" | "left";
 };
 
 // Anchors are attributes rather than CSS selectors on purpose.
@@ -175,6 +178,82 @@ export const TOUR_STEPS: TourStep[] = [
 		body:
 			"The diagram is laid out for you. Goals can still be dragged to "
 			+ "tidy up the result, and the toolbar changes colours and font size.",
+		stage: "model",
+	},
+	{
+		id: "shape-palette",
+		anchor: "shape-palette",
+		title: "The shapes",
+		body:
+			"Drag a shape onto the diagram to add a goal that is not in the "
+			+ "list, or to draw a line between two that are. The shapes match the "
+			+ "five categories: a parallelogram for a Do, a heart for a Feel, and "
+			+ "so on.",
+		stage: "model",
+		side: "left",
+	},
+	{
+		id: "tool-zoom",
+		anchor: "tool-zoom",
+		title: "Zoom",
+		body:
+			"Zoom in and out, and recentre the view. Recentre is the one to "
+			+ "reach for after a large model has been dragged off screen.",
+		stage: "model",
+		side: "left",
+	},
+	{
+		id: "tool-colour",
+		anchor: "tool-colour",
+		title: "Colour",
+		body:
+			"Recolours the selected goals. Colour carries no meaning in the "
+			+ "notation, so it is free to use for whatever a particular reader "
+			+ "needs to see -- grouping by team, say, or marking what is not "
+			+ "settled yet.",
+		stage: "model",
+		side: "left",
+	},
+	{
+		id: "tool-font-size",
+		anchor: "tool-font-size",
+		title: "Font size",
+		body:
+			"Scales the text on the diagram. Worth turning up before exporting "
+			+ "a model that has to be readable on a slide.",
+		stage: "model",
+		side: "left",
+	},
+	{
+		id: "tool-lines",
+		anchor: "tool-lines",
+		title: "Line visibility",
+		body:
+			"Hides the lines between goals. A dense model is often easier to "
+			+ "read once the connections are out of the way, and they come back "
+			+ "unchanged.",
+		stage: "model",
+		side: "left",
+	},
+	{
+		id: "reset-model",
+		anchor: "reset-model",
+		title: "Starting over",
+		body:
+			"Empty clears the model completely. Default loads the worked "
+			+ "example, which is a quicker way to see what a finished model "
+			+ "looks like than building one.<br><br>"
+			+ "<em>Neither can be undone, so save first if the current model is "
+			+ "worth keeping.</em>",
+		stage: "model",
+	},
+	{
+		id: "toggle-goal-list",
+		anchor: "toggle-goal-list",
+		title: "More room for the diagram",
+		body:
+			"Hides the goal list so the diagram has the whole window. The list "
+			+ "is still there, and nothing in it is lost by hiding it.",
 		stage: "model",
 	},
 	{

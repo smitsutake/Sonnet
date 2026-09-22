@@ -43,6 +43,11 @@ const sourceFiles = (directory: string = SRC_ROOT): string[] =>
 const literalAnchor = () =>
 	new RegExp(`${TOUR_ANCHOR_ATTRIBUTE}="([^"{]+)"`, "g");
 
+// some components take the anchor as a tourAnchor prop and write it out as
+// data-tour={tourAnchor}, which the pattern above can't see. add a spelling
+// here if you add another one, or this check quietly stops covering it.
+const forwardedAnchor = () => /tourAnchor="([^"{]+)"/g;
+
 const templatedTabAnchor = () =>
 	new RegExp(`${TOUR_ANCHOR_ATTRIBUTE}=\\{\`tab-\\$\\{`);
 
@@ -52,6 +57,10 @@ const anchorsInSource = (): Set<string> => {
 		const text = readFileSync(file, "utf8");
 		// Literal attributes: data-tour="goal-tabs"
 		[...text.matchAll(literalAnchor())].forEach((match) =>
+			found.add(match[1])
+		);
+		// forwarded: tourAnchor="tool-zoom"
+		[...text.matchAll(forwardedAnchor())].forEach((match) =>
 			found.add(match[1])
 		);
 		// Template attributes: data-tour={`tab-${...}`}

@@ -167,6 +167,8 @@ const SidebarItems = ({graph, className=""}: SidebarItemsProps) => {
     }, [divSidebar.current]);
 
     return <div className={`border border-black p-1 rounded ${className}`}
+                // guide anchor, see components/tour/tourSteps.ts
+                data-tour="shape-palette"
                 ref={divSidebar}/>;
 };
 
