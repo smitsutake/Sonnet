@@ -15,13 +15,20 @@ type StubTour = {
 
 const tours: StubTour[] = [];
 
+const configs: {steps?: {popover?: {title?: string}}[]}[] = [];
+
+// titles of the steps actually handed to driver.js for the nth tour
+const driveSteps = (n: number): string[] =>
+	(configs[n].steps ?? []).map((s) => s.popover?.title ?? "");
+
 vi.mock("driver.js", () => ({
-	driver: (config: {onDestroyed?: () => void}) => {
+	driver: (config: {onDestroyed?: () => void; steps?: unknown[]}) => {
 		const tour: StubTour = {
 			drive: vi.fn(),
 			destroy: vi.fn(() => config.onDestroyed?.()),
 		};
 		tours.push(tour);
+		configs.push(config as {steps?: {popover?: {title?: string}}[]});
 		return tour;
 	},
 }));
@@ -43,6 +50,7 @@ const fullSteps: TourStep[] = [
 
 afterEach(() => {
 	tours.length = 0;
+	configs.length = 0;
 });
 
 describe("starting part-way through", () => {
@@ -60,6 +68,15 @@ describe("starting part-way through", () => {
 		result.current.startTour(fullSteps, "hierarchy");
 
 		expect(tours[0].drive).toHaveBeenCalledWith(3);
+		unmount();
+	});
+
+	it("only runs the steps it was handed", () => {
+		// the goal list page passes a list with the canvas steps taken out
+		const {result, unmount} = renderHook(() => useTour());
+		result.current.startTour(fullSteps.filter((s) => s.stage !== "model"));
+
+		expect(driveSteps(0)).toEqual(["Intro", "Tabs", "Adding", "Hierarchy"]);
 		unmount();
 	});
 

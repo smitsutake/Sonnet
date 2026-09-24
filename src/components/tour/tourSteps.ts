@@ -28,6 +28,9 @@ export type TourStep = {
 	// Which stage of the editor the step belongs to, so the tour can be run in
 	// sections rather than all at once.
 	stage: "intro" | "goals" | "hierarchy" | "model";
+	// anchor lives inside the graph section, which is display:none on the goal
+	// list page - so these steps only run from the render model page
+	modelPageOnly?: boolean;
 	// which side the popover sits on. only needed for the toolbar - it's narrow
 	// and against the right edge, so driver.js puts the popover over it.
 	side?: "top" | "right" | "bottom" | "left";
@@ -178,6 +181,7 @@ export const TOUR_STEPS: TourStep[] = [
 		body:
 			"The diagram is laid out for you. Goals can still be dragged to "
 			+ "tidy up the result, and the toolbar changes colours and font size.",
+		modelPageOnly: true,
 		stage: "model",
 	},
 	{
@@ -189,6 +193,7 @@ export const TOUR_STEPS: TourStep[] = [
 			+ "list, or to draw a line between two that are. The shapes match the "
 			+ "five categories: a parallelogram for a Do, a heart for a Feel, and "
 			+ "so on.",
+		modelPageOnly: true,
 		stage: "model",
 		side: "left",
 	},
@@ -199,6 +204,7 @@ export const TOUR_STEPS: TourStep[] = [
 		body:
 			"Zoom in and out, and recentre the view. Recentre is the one to "
 			+ "reach for after a large model has been dragged off screen.",
+		modelPageOnly: true,
 		stage: "model",
 		side: "left",
 	},
@@ -211,6 +217,7 @@ export const TOUR_STEPS: TourStep[] = [
 			+ "notation, so it is free to use for whatever a particular reader "
 			+ "needs to see -- grouping by team, say, or marking what is not "
 			+ "settled yet.",
+		modelPageOnly: true,
 		stage: "model",
 		side: "left",
 	},
@@ -221,6 +228,7 @@ export const TOUR_STEPS: TourStep[] = [
 		body:
 			"Scales the text on the diagram. Worth turning up before exporting "
 			+ "a model that has to be readable on a slide.",
+		modelPageOnly: true,
 		stage: "model",
 		side: "left",
 	},
@@ -232,6 +240,7 @@ export const TOUR_STEPS: TourStep[] = [
 			"Hides the lines between goals. A dense model is often easier to "
 			+ "read once the connections are out of the way, and they come back "
 			+ "unchanged.",
+		modelPageOnly: true,
 		stage: "model",
 		side: "left",
 	},
@@ -275,3 +284,12 @@ const GOAL_LIST_STAGES: TourStep["stage"][] = ["intro", "goals"];
 
 export const firstStepAfterGoals = (): TourStepId | undefined =>
 	TOUR_STEPS.find((step) => !GOAL_LIST_STAGES.includes(step.stage))?.id;
+
+// what the guide runs on the page you're on. kept here so the Guide button and
+// the automatic open can't drift apart.
+export const tourForPage = (showGraphSection: boolean): {
+	steps: TourStep[];
+	startAt?: TourStepId;
+} => showGraphSection
+	? {steps: TOUR_STEPS, startAt: firstStepAfterGoals()}
+	: {steps: TOUR_STEPS.filter((step) => !step.modelPageOnly)};

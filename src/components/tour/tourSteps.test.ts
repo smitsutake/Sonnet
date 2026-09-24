@@ -8,6 +8,7 @@ import {
 	TOUR_ANCHOR_ATTRIBUTE,
 	TOUR_STEPS,
 	firstStepAfterGoals,
+	tourForPage,
 	stepsForStage,
 } from "./tourSteps";
 
@@ -131,6 +132,30 @@ describe("tour content", () => {
 		// and everything before it really is goal list stuff
 		const before = TOUR_STEPS.slice(0, TOUR_STEPS.findIndex((s) => s.id === id));
 		before.forEach((s) => expect(["intro", "goals"]).toContain(s.stage));
+	});
+
+	it("drops only the canvas steps on the goal list page", () => {
+		// the canvas and its toolbar are display:none there. Reset, the goal
+		// list toggle and Save/Export are in the header, so they stay.
+		const ids = tourForPage(false).steps.map((s) => s.id);
+
+		["model", "shape-palette", "tool-zoom", "tool-colour", "tool-font-size",
+			"tool-lines"].forEach((id) => expect(ids).not.toContain(id));
+		["reset-model", "toggle-goal-list", "save-export"]
+			.forEach((id) => expect(ids).toContain(id));
+	});
+
+	it("runs the whole guide from the render model page, starting at step 9", () => {
+		const model = tourForPage(true);
+
+		expect(model.steps).toHaveLength(TOUR_STEPS.length);
+		expect(model.startAt).toBe(firstStepAfterGoals());
+		expect(tourForPage(false).startAt).toBeUndefined();
+	});
+
+	it("only marks steps whose anchor is inside the graph section", () => {
+		TOUR_STEPS.filter((s) => s.modelPageOnly)
+			.forEach((s) => expect(s.stage).toBe("model"));
 	});
 
 	it("uses unique step ids", () => {
