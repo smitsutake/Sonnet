@@ -35,8 +35,7 @@ export const useAutoTour = (
 				window.clearInterval(poll);
 				alreadyOpened.current = true;
 				// you always land on the goal list page coming into the editor
-				const {steps, startAt} = tourForPage(false);
-				startTour(steps, startAt);
+				startTour(tourForPage(false));
 				return;
 			}
 

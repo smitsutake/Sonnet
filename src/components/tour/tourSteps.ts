@@ -279,17 +279,13 @@ export const TOUR_STEPS: TourStep[] = [
 export const stepsForStage = (stage: TourStep["stage"]): TourStep[] =>
 	TOUR_STEPS.filter((step) => step.stage === stage);
 
-// step 9 - where the model half starts. the first 8 are all goal list stuff.
+// the intro and the five categories are all about the goal list, which isn't
+// on screen once you're looking at the model
 const GOAL_LIST_STAGES: TourStep["stage"][] = ["intro", "goals"];
 
-export const firstStepAfterGoals = (): TourStepId | undefined =>
-	TOUR_STEPS.find((step) => !GOAL_LIST_STAGES.includes(step.stage))?.id;
-
-// what the guide runs on the page you're on. kept here so the Guide button and
-// the automatic open can't drift apart.
-export const tourForPage = (showGraphSection: boolean): {
-	steps: TourStep[];
-	startAt?: TourStepId;
-} => showGraphSection
-	? {steps: TOUR_STEPS, startAt: firstStepAfterGoals()}
-	: {steps: TOUR_STEPS.filter((step) => !step.modelPageOnly)};
+// the steps for the page you're on. its own list so it counts from 1 - "9 of
+// 19" looks like you missed eight steps you can't get to from here.
+export const tourForPage = (showGraphSection: boolean): TourStep[] =>
+	showGraphSection
+		? TOUR_STEPS.filter((step) => !GOAL_LIST_STAGES.includes(step.stage))
+		: TOUR_STEPS.filter((step) => !step.modelPageOnly);

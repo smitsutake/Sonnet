@@ -53,40 +53,14 @@ afterEach(() => {
 	configs.length = 0;
 });
 
-describe("starting part-way through", () => {
-	it("starts at the top when no step is named", () => {
-		const {result, unmount} = renderHook(() => useTour());
-		result.current.startTour(fullSteps);
-
-		expect(tours[0].drive).toHaveBeenCalledWith(0);
-		unmount();
-	});
-
-	it("starts at the named step", () => {
-		// pressing Guide on the render model page skips the goal list half
-		const {result, unmount} = renderHook(() => useTour());
-		result.current.startTour(fullSteps, "hierarchy");
-
-		expect(tours[0].drive).toHaveBeenCalledWith(3);
-		unmount();
-	});
-
+describe("the steps it runs", () => {
 	it("only runs the steps it was handed", () => {
-		// the goal list page passes a list with the canvas steps taken out
+		// each page passes its own list, so the guide always starts at step 1
 		const {result, unmount} = renderHook(() => useTour());
 		result.current.startTour(fullSteps.filter((s) => s.stage !== "model"));
 
+		expect(tours[0].drive).toHaveBeenCalledWith();
 		expect(driveSteps(0)).toEqual(["Intro", "Tabs", "Adding", "Hierarchy"]);
-		unmount();
-	});
-
-	it("falls back to the top if that step got filtered out", () => {
-		// nothing in jsdom renders the anchors, but these steps have none, so
-		// they all survive - ask for one that isn't in the list at all
-		const {result, unmount} = renderHook(() => useTour());
-		result.current.startTour(fullSteps, "not-a-step");
-
-		expect(tours[0].drive).toHaveBeenCalledWith(0);
 		unmount();
 	});
 });

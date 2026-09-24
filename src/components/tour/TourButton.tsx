@@ -23,10 +23,7 @@ const TourButton: React.FC<TourButtonProps> = ({className, showGraphSection}) =>
 		<Button
 			variant="outline-primary"
 			className={className}
-			onClick={() => {
-				const {steps, startAt} = tourForPage(!!showGraphSection);
-				startTour(steps, startAt);
-			}}
+			onClick={() => startTour(tourForPage(!!showGraphSection))}
 			title="Walk through how to build a motivational model"
 		>
 			Guide

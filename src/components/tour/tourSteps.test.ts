@@ -7,7 +7,6 @@ import {
 	CATEGORY_GUIDES,
 	TOUR_ANCHOR_ATTRIBUTE,
 	TOUR_STEPS,
-	firstStepAfterGoals,
 	tourForPage,
 	stepsForStage,
 } from "./tourSteps";
@@ -121,23 +120,10 @@ describe("tour content", () => {
 		});
 	});
 
-	it("knows where the model half of the guide starts", () => {
-		// what the Guide button jumps to on the render model page
-		const id = firstStepAfterGoals();
-		const step = TOUR_STEPS.find((s) => s.id === id);
-
-		expect(step).toBeDefined();
-		expect(["hierarchy", "model"]).toContain(step!.stage);
-
-		// and everything before it really is goal list stuff
-		const before = TOUR_STEPS.slice(0, TOUR_STEPS.findIndex((s) => s.id === id));
-		before.forEach((s) => expect(["intro", "goals"]).toContain(s.stage));
-	});
-
 	it("drops only the canvas steps on the goal list page", () => {
 		// the canvas and its toolbar are display:none there. Reset, the goal
 		// list toggle and Save/Export are in the header, so they stay.
-		const ids = tourForPage(false).steps.map((s) => s.id);
+		const ids = tourForPage(false).map((step) => step.id);
 
 		["model", "shape-palette", "tool-zoom", "tool-colour", "tool-font-size",
 			"tool-lines"].forEach((id) => expect(ids).not.toContain(id));
@@ -145,12 +131,23 @@ describe("tour content", () => {
 			.forEach((id) => expect(ids).toContain(id));
 	});
 
-	it("runs the whole guide from the render model page, starting at step 9", () => {
-		const model = tourForPage(true);
+	it("drops the goal list steps on the render model page", () => {
+		const ids = tourForPage(true).map((step) => step.id);
 
-		expect(model.steps).toHaveLength(TOUR_STEPS.length);
-		expect(model.startAt).toBe(firstStepAfterGoals());
-		expect(tourForPage(false).startAt).toBeUndefined();
+		expect(ids).not.toContain("intro");
+		expect(ids).not.toContain("goal-tabs");
+		expect(ids).not.toContain("add-goal");
+		expect(ids[0]).toBe("hierarchy");
+		expect(ids).toContain("tool-zoom");
+	});
+
+	it("gives each page a list it can run from the start", () => {
+		// both pages count from 1 - neither gets handed a slice of a longer
+		// list, so the progress text never starts at "9 of 19"
+		[tourForPage(true), tourForPage(false)].forEach((steps) => {
+			expect(steps.length).toBeGreaterThan(0);
+			expect(steps.length).toBeLessThan(TOUR_STEPS.length);
+		});
 	});
 
 	it("only marks steps whose anchor is inside the graph section", () => {
