@@ -1,8 +1,10 @@
 // src/pages/UserManualWeb.tsx
-import React from "react";
+
 import Container from "react-bootstrap/Container";
 import { Link } from "react-router-dom";
 import "./UserManualWeb.css";
+import React, { useState } from "react";
+
 
 // import all images from the image folder.
 const imageModules = import.meta.glob<{ default: string }>(
@@ -104,6 +106,10 @@ const UserManualWeb: React.FC = () => {
                                         <li><a href="#feedbacking">3.7.1.Adding feedback comments to model</a></li>
                                         <li><a href="#grading">3.7.2.Grading a model</a></li>
                                     </ul>
+                                </li>
+                                <li>
+                                    <a href="#viewm">3.8.Student Reviewing Grade and Feedback</a>
+
                                 </li>
 
 
@@ -225,6 +231,11 @@ const UserManualWeb: React.FC = () => {
                             <img src={images["2.2.1-staffmode"]} alt="staffmode" className="inline-icon" />
                             {" "}– Switch to Staff Mode for lecturer/client to reviewing and grading the model.
                         </li>
+                        <li>
+                            <img src={images["4.2-reviewmodelicon"]} alt="reviewmodel" className="inline-icon" />
+                            {" "}– Allows students to view the graded model, including the feedback comments and grade
+                            added by staff.
+                        </li>
                     </ul>
                     <h4 id="landing-staffmode">2.2.1.1.Staff Home Page</h4>
                     <p>When a user clicks the "Staff Mode" button, the system displays a "Name Input Page," requiring the staff member (instructor or client) to enter their name before accessing Staff Mode to view and rate the model.</p>
@@ -253,6 +264,7 @@ const UserManualWeb: React.FC = () => {
                             <img src={images["2.2.1-staffchange"]} alt="Staff change" className="inline-icon" />
                             {" "}– Once Staff Mode is activated, the staffmode button turns grey and displays "Staff mode: on", with the staff member's entered name shown beside it, confirming the current staff identity.
                         </li>
+
                     </ul>
 
 
@@ -765,6 +777,45 @@ const UserManualWeb: React.FC = () => {
 
                             <img src={images["4.1-editgrade"]} alt="egrade" />
                         </figure>
+                    </ol>
+                    <h2 id="viewm">3.8.Student Reviewing Grade and Feedback</h2>
+                    <ol>
+                        <li>
+                            Click <img src={images["4.2-reviewmodelicon"]} alt="reviewi" className="inline-icon" />
+                            {" "} in the  homepage.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.2-reviewmodel"]} alt="reviewmo" />
+                        </figure>
+                        <li>Upload the model that have been revied by teacher/staff then click {" "}<img src={images["3.6-uploadicon"]} alt="Upload button" className="inline-icon" />
+                            {" "} to confirm.</li>
+                        <figure className="manual-figure">
+                            <img src={images["4.2-upload"]} alt="uploadr" />
+                        </figure>
+                        <li>Now you can reviewing your feedback and grade.Click "Arrange Hierarchy / Render Model" in the navigation bar to view the model diagram.</li>
+                        <figure className="manual-figure">
+                            <img src={images["4.2-enter"]} alt="reviewpage" />
+                        </figure>
+                        <figure className="manual-figure">
+                        <img src={images["4.2-arrange"]} alt="reviewpage2" />
+                        </figure>
+                        <li>
+                            Click a feedback comment in the Feedback panel. A dashed arrow will point from the
+                            comment to the goal(s) it refers to.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.2-link"]} alt="feedbacklink" />
+                        </figure>
+                        <li>Click the same comment again to hide the arrow.</li>
+                        <li>
+                            Click <img src={images["4.1-yourgradeicon"]} alt="Your Grade button" className="inline-icon" /> {" "}  in the header to view your total score, the score of each component,
+                            the overall feedback, and who graded the model and when.
+                        </li>
+                        <figure className="manual-figure">
+                            <img src={images["4.2-showgrade"]} alt="showgrade" />
+                        </figure>
+
+
                     </ol>
 
 
