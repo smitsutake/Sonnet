@@ -104,11 +104,11 @@ const UserManualWeb: React.FC = () => {
                                     <a href="#staffm">3.7.Staff Mode Instruction</a>
                                     <ul className="sub-nav">
                                         <li><a href="#feedbacking">3.7.1.Adding feedback comments to model</a></li>
-                                        <li><a href="#grading">3.7.2.Grading a model</a></li>
+
                                     </ul>
                                 </li>
                                 <li>
-                                    <a href="#viewm">3.8.Student Reviewing Grade and Feedback</a>
+                                    <a href="#viewm">3.8.Student Reviewing Feedback</a>
 
                                 </li>
 
@@ -472,10 +472,7 @@ const UserManualWeb: React.FC = () => {
                             <img src={images["4.1-addfeedbackicon"]} alt="Addfeedbackbutton" className="inline-icon" />
                             {" "}– Adds a new comment to the panel.
                         </li>
-                        <li>
-                            <img src={images["4.1-gradeicon"]} alt="gradebutton" className="inline-icon" />
-                            {" "}– Grading the model.
-                        </li>
+
                     </ul>
 
 
@@ -727,58 +724,7 @@ const UserManualWeb: React.FC = () => {
                         </li>
                     </ol>
 
-                    <h3 id="grading">3.7.2.Grading a model</h3>
-                    <ol>
-                        <li>After enter staff page,click <img src={images["2.2.1-markmodel"]} alt="markmodel" className="inline-icon" /> .</li>
-
-                        <li>
-                            Upload or drag and drop the JSON file into the drop zone, then click
-                            {" "}<img src={images["3.6-uploadicon"]} alt="Upload button" className="inline-icon" />
-                            {" "} to confirm.
-                        </li>
-                        <figure className="manual-figure">
-                            <img src={images["4.1-dropmodel"]} alt="dropmodel" />
-                        </figure>
-                        <li>Once in the feedback panel interface, click "Arrange Hierarchy / Render Model" to view the complete model diagram.</li>
-                        <figure className="manual-figure">
-                            <img src={images["4.1-arrangehier"]} alt="arrangehier" />
-                        </figure>
-                        <li>
-                            Click the <img src={images["4.1-gradeicon"]} alt="Grade button" className="inline-icon" />
-                            {" "} button in the top-right corner to grade the model.
-                        </li>
-                        <li>
-                            Enter the "Total Score," "Component Score," and "Overall Feedback," then click
-                            "Save Grade" to save the score.
-                        </li>
-                        <figure className="manual-figure">
-
-                            <img src={images["4.1-gradingpage"]} alt="Gradingpange" />
-                        </figure>
-                        <li>After saving the score, the button bar in the top-right corner will change slightly.</li>
-                        <figure className="manual-figure">
-
-                            <img src={images["4.1-pageaftergeade"]} alt="newpage" />
-                        </figure>
-                        <li>
-                            Click <img src={images["4.1-yourgradeicon"]} alt="Your Grade button" className="inline-icon" />
-                            {" "} to view the score.
-                        </li>
-                        <figure className="manual-figure">
-
-                            <img src={images["4.1-yourgrade"]} alt="ygrade" />
-                        </figure>
-
-                        <li>
-                            Click <img src={images["4.1-editgradeicon"]} alt="Edit Grade button" className="inline-icon" />
-                            {" "}  to modify the score.
-                        </li>
-                        <figure className="manual-figure">
-
-                            <img src={images["4.1-editgrade"]} alt="egrade" />
-                        </figure>
-                    </ol>
-                    <h2 id="viewm">3.8.Student Reviewing Grade and Feedback</h2>
+                    <h2 id="viewm">3.8.Student Reviewing Feedback</h2>
                     <ol>
                         <li>
                             Click <img src={images["4.2-reviewmodelicon"]} alt="reviewi" className="inline-icon" />
@@ -792,7 +738,7 @@ const UserManualWeb: React.FC = () => {
                         <figure className="manual-figure">
                             <img src={images["4.2-upload"]} alt="uploadr" />
                         </figure>
-                        <li>Now you can reviewing your feedback and grade.Click "Arrange Hierarchy / Render Model" in the navigation bar to view the model diagram.</li>
+                        <li>Now you can reviewing your feedback .Click "Arrange Hierarchy / Render Model" in the navigation bar to view the model diagram.</li>
                         <figure className="manual-figure">
                             <img src={images["4.2-enter"]} alt="reviewpage" />
                         </figure>
@@ -807,13 +753,7 @@ const UserManualWeb: React.FC = () => {
                             <img src={images["4.2-link"]} alt="feedbacklink" />
                         </figure>
                         <li>Click the same comment again to hide the arrow.</li>
-                        <li>
-                            Click <img src={images["4.1-yourgradeicon"]} alt="Your Grade button" className="inline-icon" /> {" "}  in the header to view your total score, the score of each component,
-                            the overall feedback, and who graded the model and when.
-                        </li>
-                        <figure className="manual-figure">
-                            <img src={images["4.2-showgrade"]} alt="showgrade" />
-                        </figure>
+
 
 
                     </ol>
