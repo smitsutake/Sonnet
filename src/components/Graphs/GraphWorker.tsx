@@ -37,6 +37,7 @@ import ConfirmModal from "../ConfirmModal.tsx";
 import {parseGoalRefId} from "../utils/GraphUtils";
 import {fixEditorPosition, returnFocusToGraph} from "../utils/GraphUtils.tsx";
 import {addGoalToTab, addGoalToTree} from "../context/treeDataSlice.ts";
+import toast from "react-hot-toast";
 
 //Graph id & Side bar id
 const GRAPH_DIV_ID = "graphContainer";
@@ -796,7 +797,9 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                     dispatch(addGoalToTab(newGoal));
                     dispatch(addGoalToTree(newGoal));
                 });
-
+                //display duplicated massage
+                const count = selectedCells.length;
+                toast.success(`Duplicated ${count} node${count > 1 ? 's' : ''}`);
                 // Data changes automatically trigger re-render via Redux
                 return;
             }

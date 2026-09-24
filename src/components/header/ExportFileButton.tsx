@@ -11,6 +11,7 @@ import {useGraph} from "../context/GraphContext";
 import {returnFocusToGraph} from "../utils/GraphUtils";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import toast from "react-hot-toast";
 
 const PNG_EXPORT_SCALE = 3;
 
@@ -126,10 +127,12 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                 // Clean up
                 URL.revokeObjectURL(url);
             }
+            toast.success("Exported as SVG");
         }
 
         catch (error) {
             console.error('Failed to save file: ', error);
+            toast.error("Failed to export SVG");
         }
         // Return focus to graph container to enable keyboard shortcuts
         returnFocusToGraph();
@@ -193,6 +196,7 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                         const writable = await handle.createWritable();
                         await writable.write(blob);
                         await writable.close();
+                        toast.success("Exported as PNG");
                     } else {
                         // Fallback for non-Chromium browsers
                         const url = URL.createObjectURL(blob);
@@ -204,6 +208,7 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                     }
                 } catch (error) {
                     console.error('Failed to save file: ', error);
+                    toast.error("Failed to export PNG");
                 }
             }
         }, 'image/png');
