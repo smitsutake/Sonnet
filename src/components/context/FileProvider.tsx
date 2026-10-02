@@ -3,6 +3,7 @@ import {createInitialState, treeDataSlice} from "./treeDataSlice.ts";
 import {initialTabs} from "../../data/initialTabs.ts";
 import {Cluster, ClusterGoal, GoalType, InstanceId, Label, TabContent, TreeGoal} from "../types.ts";
 import useLocalStorage from "../utils/useLocalStorage.tsx"
+import {FeedbackData} from "../feedback/feedbackTypes.ts";
 
 // This hook manages the goals that are in use in the motivational model.
 //
@@ -20,9 +21,14 @@ import useLocalStorage from "../utils/useLocalStorage.tsx"
 
 
 // Type of the json data
+//
+// "feedback" is optional so that models saved before the feedback feature
+// existed still parse. Reading code must treat a missing block as "this file
+// has never been reviewed" rather than as an error.
 export type JSONData = {
     tabData: TabContent[];
     treeData: TreeGoal[];
+    feedback?: FeedbackData;
 };
 
 export const DataType = {JSON: "AMMBER_JSON"};
