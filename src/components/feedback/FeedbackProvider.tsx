@@ -1,6 +1,7 @@
 import React, {PropsWithChildren, useCallback, useMemo, useState} from "react";
 import {InstanceId} from "../types.ts";
 import {createFeedbackItem, FeedbackData, FeedbackItem} from "./feedbackTypes.ts";
+import {MAX_FEEDBACK_ITEMS} from "./feedbackColours.ts";
 import {FeedbackContext} from "./feedbackContext.ts";
 
 // ============================================================
@@ -40,6 +41,12 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			// session has started, but guard anyway rather than write an item with
 			// an empty author into a saved file.
 			if (reviewerName === null) {
+				return previous;
+			}
+			// Comments are capped so that every one keeps a distinct colour.
+			// Enforced here as well as on the button, so a file that arrives
+			// over the limit cannot be pushed further over it.
+			if (previous.length >= MAX_FEEDBACK_ITEMS) {
 				return previous;
 			}
 			return [...previous, createFeedbackItem(reviewerName)];
