@@ -9,6 +9,7 @@ import {JSONData, useFileContext} from "./context/FileProvider";
 import {reset} from "./context/treeDataSlice.ts";
 import {TabContent, TreeGoal} from "./types.ts";
 import {useFeedbackContext} from "./feedback/feedbackContext";
+import {parseFeedbackData} from "./feedback/feedbackTypes";
 
 const EMPTY_FILE_ALERT = "Please select a file";
 const JSON_FILE_ALERT = "Please select a JSON file.";
@@ -64,6 +65,13 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	const {dispatch} = useFileContext();
 	const {loadItems, reviewerName, setReviewMode} = useFeedbackContext();
 
+	// Pulls the feedback block off a freshly parsed file and hands it to the
+	// feedback session. Called for every open, not just teaching-staff opens,
+	// so that a student opening a reviewed file sees the comments too.
+	const loadFeedbackFromFile = (data: JSONData) => {
+		loadItems(parseFeedbackData(data.feedback));
+	};
+
 	// Handle Create Model button click - load default data
 	const handleCreateModel = () => {
 		dispatch(reset({
@@ -110,6 +118,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                                 tabData: initialTabs,
                                 treeData: convertedJsonData.treeData,
                             }));
+							loadFeedbackFromFile(convertedJsonData);
 							// File imported successfully, user can now click Upload button to navigate
 							console.log("File imported successfully");
 						} else {
@@ -166,7 +175,8 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                         tabData: initialTabs,
                         treeData: convertedJsonData.treeData,
                     }));
-
+					loadFeedbackFromFile(convertedJsonData);
+					
 					// File imported successfully, user can now click Upload button to navigate
 					console.log("File imported successfully (file input)");
 				} else {
