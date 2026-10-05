@@ -20,6 +20,7 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 	const [reviewerName, setReviewerName] = useState<string | null>(null);
 	const [items, setItems] = useState<FeedbackItem[]>([]);
 	const [fileHadFeedback, setFileHadFeedback] = useState(false);
+	const [isReviewMode, setReviewMode] = useState(false);
 
 	const startReviewSession = useCallback((name: string) => {
 		setReviewerName(name.trim());
@@ -67,6 +68,8 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			removeItem,
 			loadItems,
 			fileHadFeedback,
+			isReviewMode,
+			setReviewMode,
 		}),
 		[
 			reviewerName,
@@ -78,6 +81,7 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			removeItem,
 			loadItems,
 			fileHadFeedback,
+			isReviewMode,
 		]
 	);
 

@@ -24,6 +24,12 @@ export type FeedbackContextProps = {
 	// True when the open file arrived already carrying feedback. Drives the
 	// read-only view for a student opening a reviewed model.
 	fileHadFeedback: boolean;
+
+	// True only when the current model was opened via the "Review" or "Mark
+	// model" button. "Open Model" never sets this, so feedback/marking stay
+	// unreachable there even if the file carries feedback or staff mode is on.
+	isReviewMode: boolean;
+	setReviewMode: (isReviewMode: boolean) => void;
 };
 
 export const FeedbackContext = createContext<FeedbackContextProps | null>(null);
