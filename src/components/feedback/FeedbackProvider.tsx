@@ -1,4 +1,5 @@
 import React, {PropsWithChildren, useCallback, useMemo, useState} from "react";
+import {InstanceId} from "../types.ts";
 import {createFeedbackItem, FeedbackData, FeedbackItem} from "./feedbackTypes.ts";
 import {FeedbackContext} from "./feedbackContext.ts";
 
@@ -21,6 +22,8 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 	const [items, setItems] = useState<FeedbackItem[]>([]);
 	const [fileHadFeedback, setFileHadFeedback] = useState(false);
 	const [isReviewMode, setReviewMode] = useState(false);
+	const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
 	const startReviewSession = useCallback((name: string) => {
 		setReviewerName(name.trim());
@@ -28,6 +31,7 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 
 	const endReviewSession = useCallback(() => {
 		setReviewerName(null);
+		setLinkingItemId(null);
 	}, []);
 
 	const addItem = useCallback(() => {
@@ -50,11 +54,34 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 
 	const removeItem = useCallback((id: string) => {
 		setItems((previous) => previous.filter((item) => item.id !== id));
+		setLinkingItemId((current) => (current === id ? null : current));
+		setSelectedItemId((current) => (current === id ? null : current));
+	}, []);
+
+	// One comment can point at many goals, and the same goal can be pointed at
+	// by many comments. Clicking a goal that is already linked removes the link.
+	const toggleTarget = useCallback((id: string, instanceId: InstanceId) => {
+		setItems((previous) =>
+			previous.map((item) => {
+				if (item.id !== id) {
+					return item;
+				}
+				const alreadyLinked = item.targets.includes(instanceId);
+				return {
+					...item,
+					targets: alreadyLinked
+						? item.targets.filter((target) => target !== instanceId)
+						: [...item.targets, instanceId],
+				};
+			})
+		);
 	}, []);
 
 	const loadItems = useCallback((data: FeedbackData | null) => {
 		setItems(data?.items ?? []);
 		setFileHadFeedback(data !== null);
+		setLinkingItemId(null);
+		setSelectedItemId(null);
 	}, []);
 
 	const value = useMemo(
@@ -66,10 +93,15 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			addItem,
 			updateItemContent,
 			removeItem,
+			toggleTarget,
 			loadItems,
 			fileHadFeedback,
 			isReviewMode,
 			setReviewMode,
+			linkingItemId,
+			setLinkingItemId,
+			selectedItemId,
+			setSelectedItemId,
 		}),
 		[
 			reviewerName,
@@ -79,9 +111,12 @@ const FeedbackProvider: React.FC<PropsWithChildren> = ({children}) => {
 			addItem,
 			updateItemContent,
 			removeItem,
+			toggleTarget,
 			loadItems,
 			fileHadFeedback,
 			isReviewMode,
+			linkingItemId,
+			selectedItemId,
 		]
 	);
 

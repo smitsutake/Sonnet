@@ -1,4 +1,5 @@
 import {createContext, useContext} from "react";
+import {InstanceId} from "../types.ts";
 import {FeedbackData, FeedbackItem} from "./feedbackTypes.ts";
 
 // The context object and its hook live apart from the provider component so
@@ -17,6 +18,7 @@ export type FeedbackContextProps = {
 	addItem: () => void;
 	updateItemContent: (id: string, content: string) => void;
 	removeItem: (id: string) => void;
+	toggleTarget: (id: string, instanceId: InstanceId) => void;
 
 	// Replaces the whole set. Called whenever a file is opened.
 	loadItems: (data: FeedbackData | null) => void;
@@ -30,6 +32,16 @@ export type FeedbackContextProps = {
 	// unreachable there even if the file carries feedback or staff mode is on.
 	isReviewMode: boolean;
 	setReviewMode: (isReviewMode: boolean) => void;
+
+	// id of the box waiting for a goal to be clicked, or null.
+	linkingItemId: string | null;
+	setLinkingItemId: (id: string | null) => void;
+
+	// id of the box the reader has selected, or null for "show everything".
+	// Selection is available to students as well as reviewers: it is how a
+	// student works out which goals a given comment is about.
+	selectedItemId: string | null;
+	setSelectedItemId: (id: string | null) => void;
 };
 
 export const FeedbackContext = createContext<FeedbackContextProps | null>(null);

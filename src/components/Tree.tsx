@@ -282,6 +282,10 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
             opacity: ghost ? 0.55 : 1,
           }}
           className="tree-list"
+          // Anchor for the feedback overlay. Feedback arrows locate goal rows
+          // by these attributes; see components/feedback/FeedbackArrows.tsx.
+          data-goal-instance={treeItem.instanceId}
+          data-goal-id={treeItem.id}
           onDoubleClick={() => {
             if (!isEditing && !isEmptyGoal(treeItem)) {
               handleEdit();
