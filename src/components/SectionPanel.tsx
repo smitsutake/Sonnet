@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from "react";
 
 import ErrorModal from "./ErrorModal";
 import FeedbackPanel from "./feedback/FeedbackPanel";
+import FeedbackArrows from "./feedback/FeedbackArrows";
 import {useFeedbackContext} from "./feedback/feedbackContext";
 import GoalList from "./GoalList";
 import Tree from "./Tree";
@@ -65,7 +66,7 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
   const [draggedItem, setDraggedItem] = useState<TreeGoal | null>(null);
   // Simply store ids of all items in the tree for fast check instead of recursive search
     const {dispatch, tree} = useFileContext();
-    const {reviewerName, fileHadFeedback, isReviewMode} =
+    const {reviewerName, items: feedbackItems, fileHadFeedback, isReviewMode, selectedItemId} =
     useFeedbackContext();
     // The panel appears for a reviewer, and also for anyone opening a file that
     // already carries feedback so students can read the comments left for them.
@@ -252,6 +253,8 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         height: "100%",
         display: "flex",
         padding: paddingX,
+        // Positioning context for the feedback arrow overlay.
+        position: "relative",
       }}
       ref={parentRef}
       // onClick={() => setIsHintVisible(false)}
@@ -357,6 +360,14 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         >
           <FeedbackPanel/>
         </Resizable>
+      )}
+
+      {showFeedbackSection && (
+        <FeedbackArrows
+          items={feedbackItems}
+          containerRef={parentRef}
+          selectedItemId={selectedItemId}
+        />
       )}
     </div>
   );

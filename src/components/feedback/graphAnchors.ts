@@ -1,5 +1,6 @@
 import type {Cell, Graph} from "@maxgraph/core";
 import {InstanceId} from "../types.ts";
+import {RectLike} from "./feedbackGeometry.ts";
 
 // ============================================================
 // Locating goals on the rendered model
@@ -63,7 +64,7 @@ export const primaryInstanceIdOfCell = (cell: Cell | null): InstanceId | null =>
 
 // Walks the model and collects every cell, so that shapes shared by several
 // goals can be found by inspecting their ids.
-export const allCells = (graph: Graph): Cell[] => {
+const allCells = (graph: Graph): Cell[] => {
 	const collected: Cell[] = [];
 
 	const visit = (cell: Cell) => {
@@ -97,4 +98,97 @@ export const findCellForInstanceId = (
 		instanceIdsFromCellId(cell.getId()).includes(instanceId)
 	);
 	return shared ?? null;
+};
+
+// Screen rectangle of a goal's shape, in the same page coordinates that
+// getBoundingClientRect returns, so it can be mixed with DOM measurements.
+//
+// Returns null when the goal is not currently drawn, when the canvas is
+// hidden, or when the shape has been scrolled out of view.
+export const graphRectForInstanceId = (
+	graph: Graph | null,
+	instanceId: InstanceId
+): RectLike | null => {
+	if (!graph) {
+		return null;
+	}
+
+	const container = graph.container;
+	if (!container || container.offsetParent === null) {
+		// offsetParent is null when the canvas is inside a hidden panel.
+		return null;
+	}
+
+	const cell = findCellForInstanceId(graph, instanceId);
+	if (!cell) {
+		return null;
+	}
+
+	const state = graph.view.getState(cell);
+	if (!state) {
+		return null;
+	}
+
+	const containerRect = container.getBoundingClientRect();
+
+	// getState already accounts for zoom and translation, but is measured from
+	// the container's own origin and ignores how far it has been scrolled.
+	const left = containerRect.left + state.x - container.scrollLeft;
+	const top = containerRect.top + state.y - container.scrollTop;
+
+	// Ignore shapes that have been scrolled outside the visible canvas: an
+	// arrow to somewhere off-screen is worse than no arrow.
+	const isVisible =
+		left + state.width > containerRect.left
+		&& left < containerRect.right
+		&& top + state.height > containerRect.top
+		&& top < containerRect.bottom;
+
+	if (!isVisible) {
+		return null;
+	}
+
+	return {
+		left,
+		top,
+		right: left + state.width,
+		width: state.width,
+		height: state.height,
+	};
+};
+
+// Rectangles of every goal shape currently drawn, in page coordinates.
+//
+// Used as obstacles when routing feedback arrows, so a line does not end up
+// lying across another goal's label. The arrow's own target is excluded --
+// the arrow has to be able to reach it.
+export const goalRectsExcept = (
+	graph: Graph | null,
+	exclude: InstanceId
+): RectLike[] => {
+	if (!graph) {
+		return [];
+	}
+
+	const seen = new Set<string>();
+	const rects: RectLike[] = [];
+
+	allCells(graph).forEach((cell) => {
+		const ids = instanceIdsFromCellId(cell.getId());
+		if (ids.length === 0 || ids.includes(exclude)) {
+			return;
+		}
+		const id = cell.getId();
+		if (!id || seen.has(id)) {
+			return;
+		}
+		seen.add(id);
+
+		const rect = graphRectForInstanceId(graph, ids[0]);
+		if (rect) {
+			rects.push(rect);
+		}
+	});
+
+	return rects;
 };
