@@ -295,32 +295,37 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
         />
       </Resizable>
 
-      {/* Cluster Hierarchy Section */}
-      <div
-        style={{
-          ...defaultStyle,
-          width: "100%",
-          minWidth: DEFINED_PROPORTIONS.minWidth,
-          minHeight: DEFAULT_HEIGHT,
-          height: DEFAULT_HEIGHT,
-          padding: "10px",
-          backgroundColor: "rgba(35, 144, 231, 0.1)",
-          overflow: "auto",
-        }}
-        onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}
-        ref={sectionTwoRef}
-      >
-        <Tree
+      {/* Cluster Hierarchy Section. Dropped entirely once the feedback panel
+          is showing: it is a drag-to-rearrange tool for building the model,
+          and a reviewer or a student reading feedback is never doing that --
+          the rendered model on the right already shows the same hierarchy. */}
+      {!showFeedbackSection && (
+        <div
+          style={{
+            ...defaultStyle,
+            width: "100%",
+            minWidth: DEFINED_PROPORTIONS.minWidth,
+            minHeight: DEFAULT_HEIGHT,
+            height: DEFAULT_HEIGHT,
+            padding: "10px",
+            backgroundColor: "rgba(35, 144, 231, 0.1)",
+            overflow: "auto",
+          }}
+          onDrop={handleDrop}
+          onDragOver={(event) => event.preventDefault()}
+          ref={sectionTwoRef}
+        >
+          <Tree
 
-          // existingItemIds={existingItemIds}
-          // setTreeIds={setTreeIds}
-          handleSynTableTree={handleSynTableTree}
-          // setExistingItemIds={setExistingItemIds}
-          existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
-          setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
-        />
-      </div>
+            // existingItemIds={existingItemIds}
+            // setTreeIds={setTreeIds}
+            handleSynTableTree={handleSynTableTree}
+            // setExistingItemIds={setExistingItemIds}
+            existingGoalReferenceInstanceId={existingGoalReferenceInstanceId}
+            setExistingGoalReferenceInstanceId={setExistingGoalReferenceInstanceId}
+          />
+        </div>
+      )}
 
       {/* Graph Render Section */}
       <Resizable
