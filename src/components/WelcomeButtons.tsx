@@ -6,6 +6,7 @@ import ErrorModal, {ErrorModalProps} from "./ErrorModal";
 import FileDrop from "./FileDrop";
 import FileUploadSection from "./FileUploadSection";
 import {JSONData, useFileContext} from "./context/FileProvider";
+import {newModelId} from "./context/modelId.ts";
 import {reset} from "./context/treeDataSlice.ts";
 import {TabContent, TreeGoal} from "./types.ts";
 import {useFeedbackContext} from "./feedback/feedbackContext";
@@ -62,7 +63,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 
 	const navigate = useNavigate();
 
-	const {dispatch} = useFileContext();
+	const {dispatch, setModelId} = useFileContext();
 	const {loadItems, reviewerName, setReviewMode} = useFeedbackContext();
 
 	// Pulls the feedback block off a freshly parsed file and hands it to the
@@ -70,6 +71,14 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	// so that a student opening a reviewed file sees the comments too.
 	const loadFeedbackFromFile = (data: JSONData) => {
 		loadItems(parseFeedbackData(data.feedback));
+	};
+
+	// Adopts the opened file's own id, so Version History picks up that
+	// model's existing checkpoints. A file saved before Version History
+	// existed has no id yet; it gets a fresh one here, exactly like
+	// loadFeedbackFromFile stamps a pre-feedback file on first open.
+	const loadModelIdFromFile = (data: JSONData) => {
+		setModelId(data.modelId ?? newModelId());
 	};
 
 	// Handle Create Model button click - load default data
@@ -82,6 +91,9 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 		// was loaded from a file earlier in this session.
 		loadItems(null);
 		setReviewMode(false);
+		// Nor does it inherit the previous model's Version History -- a blank
+		// model is a new model, with its own id and an empty history.
+		setModelId(newModelId());
 	};
 
 	const handleJSONFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -119,6 +131,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                                 treeData: convertedJsonData.treeData,
                             }));
 							loadFeedbackFromFile(convertedJsonData);
+							loadModelIdFromFile(convertedJsonData);
 							// File imported successfully, user can now click Upload button to navigate
 							console.log("File imported successfully");
 						} else {
@@ -176,7 +189,8 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                         treeData: convertedJsonData.treeData,
                     }));
 					loadFeedbackFromFile(convertedJsonData);
-					
+					loadModelIdFromFile(convertedJsonData);
+
 					// File imported successfully, user can now click Upload button to navigate
 					console.log("File imported successfully (file input)");
 				} else {
