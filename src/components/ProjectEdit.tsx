@@ -5,6 +5,7 @@ import "./ProjectEdit.css";
 import SectionPanel from "./SectionPanel";
 import ProgressBar from "./ProgressBar";
 import {GraphProvider} from "./context/GraphContext";
+import VersionHistoryProvider from "./model-version-control/VersionHistoryProvider";
 
 const ProjectEdit: React.FC = () => {
     const [showGoalSection, setShowGoalSection] = useState(true);
@@ -12,6 +13,7 @@ const ProjectEdit: React.FC = () => {
 
     return (
         <GraphProvider>
+          <VersionHistoryProvider>
             <ProjectEditHeader showGoalSection={showGoalSection}
                                setShowGoalSection={setShowGoalSection}
                                showGraphSection={showGraphSection}/>
@@ -22,6 +24,7 @@ const ProjectEdit: React.FC = () => {
                           showGraphSection={showGraphSection}
                           setShowGoalSection={setShowGoalSection}
                           paddingX={15}/>
+          </VersionHistoryProvider>
         </GraphProvider>
     );
 };
