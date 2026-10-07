@@ -10,6 +10,7 @@ import {isChrome, isEdge, isOpera} from "react-device-detect";
 import ResetGraphButton from "../Graphs/ResetGraphButton.tsx";
 
 import HomeButton from "./HomeButton.tsx";
+import VersionHistoryButton from "../model-version-control/VersionHistoryButton.tsx";
 
 type ProjectEditHeaderProps = {
 	showGoalSection: boolean;
@@ -24,13 +25,13 @@ const ProjectEditHeader: React.FC<ProjectEditHeaderProps> = ({
 	showGraphSection,
   }) => {
 	const [isBrowserSupported, setIsBrowserSupported] = useState(false);
-  
+
 	useEffect(() => {
 		if (isChrome || isEdge || isOpera) {
 			setIsBrowserSupported(true);
 		}
 	}, []);
-  
+
 	return (
 		<header className="w-full sticky top-0 z-10 border-b bg-white shadow-sm">
             <Container fluid>
@@ -40,6 +41,7 @@ const ProjectEditHeader: React.FC<ProjectEditHeaderProps> = ({
                         <ResetGraphButton variant="outline-primary" className="ms-3"/>
                     </Col>
                     <Col className="d-flex flex-column flex-sm-row gap-2 justify-content-end align-items-center">
+                        <VersionHistoryButton/>
                         <ButtonGroup>
                             {/* Pass showGraphSection to ExportFileButton to control enablement */}
                             <ExportFileButton showGraphSection={showGraphSection}/>
