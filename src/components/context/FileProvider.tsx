@@ -4,6 +4,7 @@ import {initialTabs} from "../../data/initialTabs.ts";
 import {Cluster, ClusterGoal, GoalType, InstanceId, Label, TabContent, TreeGoal} from "../types.ts";
 import useLocalStorage from "../utils/useLocalStorage.tsx"
 import {FeedbackData} from "../feedback/feedbackTypes.ts";
+import {newModelId} from "./modelId.ts";
 
 // This hook manages the goals that are in use in the motivational model.
 //
@@ -25,10 +26,14 @@ import {FeedbackData} from "../feedback/feedbackTypes.ts";
 // "feedback" is optional so that models saved before the feedback feature
 // existed still parse. Reading code must treat a missing block as "this file
 // has never been reviewed" rather than as an error.
+// "modelId" is optional for the same reason "feedback" is: a file saved
+// before Version History existed simply does not have one yet. It is
+// stamped on the file the first time it is opened -- see modelId.ts.
 export type JSONData = {
     tabData: TabContent[];
     treeData: TreeGoal[];
     feedback?: FeedbackData;
+    modelId?: string;
 };
 
 export const DataType = {JSON: "AMMBER_JSON"};
@@ -36,6 +41,7 @@ export const DataType = {JSON: "AMMBER_JSON"};
 export const LocalStorageType = {
     TREE: "ammber/treeData",
     TAB: "ammber/tabData",
+    MODEL_ID: "ammber/modelId",
 };
 
 // XXX this should be a Set
@@ -87,6 +93,11 @@ type DispatchActions = SliceActions<typeof treeDataSlice.actions, "treeData">
 interface FileContextProps {
     jsonFileHandle: FileSystemFileHandle | null
     setJsonFileHandle: (jsonHandle: FileSystemFileHandle | null) => void
+    // Stable id for the model currently open, independent of its file name.
+    // Null only for the instant before FileProvider mints the first one; see
+    // modelId.ts for why this exists and how Version History uses it.
+    modelId: string | null
+    setModelId: (modelId: string | null) => void
     tabData: TabContent[]
     treeData: TreeGoal[]
     cluster: Cluster
@@ -104,6 +115,8 @@ interface FileContextProps {
 const FileContext = createContext<FileContextProps>({
     jsonFileHandle: null,
     setJsonFileHandle: () => { },
+    modelId: null,
+    setModelId: () => { },
     tabData: [],
     treeData: [],
     cluster: {ClusterGoals: []},
@@ -164,6 +177,21 @@ const FileProvider: React.FC<PropsWithChildren> = ({children}) => {
     const initialState = createInitialState(tabData, storedTreeData);
     const [state, dispatch] = useReducer(treeDataSlice.reducer, initialState);
     const [jsonFileHandle, setJsonFileHandle] = useState<FileSystemFileHandle | null>(null);
+    const [modelId, setModelId] = useLocalStorage<string | null>(
+        LocalStorageType.MODEL_ID,
+        null
+    );
+
+    // Every model needs an id from the moment the editor has one open --
+    // including right after the very first visit, before anything has been
+    // created or opened -- or Version History has nothing to key its entries
+    // on. Opening or creating a model later replaces this with its own id
+    // (see WelcomeButtons); this only covers the gap before that happens.
+    useEffect(() => {
+        if (modelId === null) {
+            setModelId(newModelId());
+        }
+    }, [modelId, setModelId]);
 
     useEffect(() => {
         console.log("FileProvider state updated:", state);
@@ -203,6 +231,8 @@ const FileProvider: React.FC<PropsWithChildren> = ({children}) => {
             setXmlData,
             jsonFileHandle,
             setJsonFileHandle,
+            modelId,
+            setModelId,
         }}>
             {children}
         </FileContext.Provider>
