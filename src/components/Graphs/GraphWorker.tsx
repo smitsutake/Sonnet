@@ -65,6 +65,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.
     const isRenderingRef = useRef(false);
     const undoManagerRef = useRef<UndoManager | null>(null);
+    const lastExportToggleTimeRef = useRef<number>(0);
 
 
     const hasFunctionalGoal = (cluster: Cluster) => (
@@ -800,14 +801,34 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 // Data changes automatically trigger re-render via Redux
                 return;
             }
-            // Ctrl+E / Cmd+E → Toggle Export dropdown
+            // Ctrl+E / Cmd+E → Open Export dropdown and remember the time
             if (isModifier && event.key === 'e') {
                 event.preventDefault();
+                lastExportToggleTimeRef.current = Date.now();
                 const exportToggle = document.querySelector('.btn-export-hover .dropdown-toggle') as HTMLButtonElement;
                 if (exportToggle) {
                     exportToggle.click();
                 }
                 return;
+            }
+
+            // Ctrl+E then P → Export as PNG
+            // Ctrl+E then S → Export as SVG
+            // (Only triggers if P or S is pressed within 2 seconds of Ctrl+E)
+            if (event.key === 'p' || event.key === 's') {
+                const timeSinceToggle = Date.now() - lastExportToggleTimeRef.current;
+                if (timeSinceToggle < 2000) {
+                    event.preventDefault();
+                    const selector = event.key === 'p'
+                        ? '[data-export="png"]'
+                        : '[data-export="svg"]';
+                    const exportItem = document.querySelector(selector) as HTMLElement;
+                    if (exportItem) {
+                        exportItem.click();
+                    }
+                    lastExportToggleTimeRef.current = 0; // Reset to prevent repeat
+                    return;
+                }
             }
         };
 

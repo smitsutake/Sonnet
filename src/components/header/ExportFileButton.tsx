@@ -233,12 +233,16 @@ const ExportFileButton = ({showGraphSection}: { showGraphSection: boolean }) => 
                                 variant="outline-primary"
                                 disabled={!isReady}
                                 className="btn-export-hover">
-                    <Dropdown.Item onClick={() => exportGraphAsPNG(graph!)}
-                                   disabled={!graph}>
+                    <Dropdown.Item
+                        data-export="png"
+                        onClick={() => exportGraphAsPNG(graph!)}
+                        disabled={!graph}>
                         Export as PNG
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={() => exportGraphAsSVG(graph!)}
-                                   disabled={!graph}>
+                    <Dropdown.Item
+                        data-export="svg"
+                        onClick={() => exportGraphAsSVG(graph!)}
+                        disabled={!graph}>
                         Export as SVG
                     </Dropdown.Item>
                 </DropdownButton>
