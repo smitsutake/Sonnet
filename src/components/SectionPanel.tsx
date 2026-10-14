@@ -1,5 +1,5 @@
 import {Resizable, ResizeCallback} from "re-resizable";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import ErrorModal from "./ErrorModal";
 import GoalList from "./GoalList";
@@ -195,7 +195,9 @@ const SectionPanel: React.FC<SectionPanelProps> = ({
   };
 
   // Get the parent div inner width and set starter width for section one and section three
-  useEffect(() => {
+  // layout effect so the width is set before the graph section is drawn, otherwise
+  // the graph gets centred while the section is still at its min width
+  useLayoutEffect(() => {
     if (parentRef.current) {
       const newParentWidth = parentRef.current.clientWidth - paddingX * 2;
       setParentWidth(newParentWidth);

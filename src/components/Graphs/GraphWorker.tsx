@@ -637,7 +637,6 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         if (!showGraphSection || !graph || !divGraph.current) return;
 
         const container = divGraph.current;
-        let lastBounds: { width: number; height: number } | null = null;
 
         const observer = new ResizeObserver(() => {
             const bounds = graph.getGraphBounds();
@@ -645,18 +644,11 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
 
             const {width, height} = bounds;
 
-            // Wait until graph has valid size
+            // Wait until graph has valid size, then center and stop observing.
+            // don't wait for a 2nd resize, sometimes there isn't one and it never centres
             if (width > 0 && height > 0) {
-
-                // Check if bounds are stable (same as last frame)
-                if (lastBounds && lastBounds.width === width && lastBounds.height === height) {
-                    // Graph is finalized -> center and stop observing
-                    recentreView(graph);
-                    observer.disconnect();
-                } else {
-                    // Store bounds for next frame
-                    lastBounds = {width, height};
-                }
+                recentreView(graph);
+                observer.disconnect();
             }
         });
 
