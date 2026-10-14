@@ -1,7 +1,6 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
 import {useTour} from "./useTour.ts";
-import {tourForPage} from "./tourSteps.ts";
 
 // Starts the guided tour.
 //
@@ -17,13 +16,13 @@ type TourButtonProps = {
 };
 
 const TourButton: React.FC<TourButtonProps> = ({className, showGraphSection}) => {
-	const {startTour} = useTour();
+	const {startForPage} = useTour();
 
 	return (
 		<Button
 			variant="outline-primary"
 			className={className}
-			onClick={() => startTour(tourForPage(!!showGraphSection))}
+			onClick={() => startForPage(!!showGraphSection)}
 			title="Walk through how to build a motivational model"
 		>
 			Guide

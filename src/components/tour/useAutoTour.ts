@@ -1,5 +1,5 @@
 import {useEffect, useRef} from "react";
-import {anchorSelector, TOUR_STEPS, tourForPage} from "./tourSteps.ts";
+import {anchorSelector, TOUR_STEPS} from "./tourSteps.ts";
 import {useTour} from "./useTour.ts";
 import {shouldOpenAutomatically} from "./tourPolicy.ts";
 
@@ -17,7 +17,7 @@ const READY_ANCHOR = TOUR_STEPS.find((step) => step.anchor)?.anchor;
 export const useAutoTour = (
 	enabled: boolean = shouldOpenAutomatically()
 ): void => {
-	const {startTour} = useTour();
+	const {startForPage} = useTour();
 	// once per visit to the editor, not once per re-render
 	const alreadyOpened = useRef(false);
 
@@ -35,7 +35,7 @@ export const useAutoTour = (
 				window.clearInterval(poll);
 				alreadyOpened.current = true;
 				// you always land on the goal list page coming into the editor
-				startTour(tourForPage(false));
+				startForPage(false);
 				return;
 			}
 
@@ -47,5 +47,5 @@ export const useAutoTour = (
 		}, POLL_INTERVAL_MS);
 
 		return () => window.clearInterval(poll);
-	}, [enabled, startTour]);
+	}, [enabled, startForPage]);
 };

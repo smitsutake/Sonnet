@@ -2,7 +2,8 @@ import {useCallback, useEffect} from "react";
 import {driver, DriveStep} from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tourTheme.css";
-import {anchorSelector, TOUR_STEPS, TourStep} from "./tourSteps.ts";
+import {anchorSelector, TOUR_STEPS, TourStep, tourForPage} from "./tourSteps.ts";
+import {goToModelPage} from "./tourFlow.ts";
 
 // ============================================================
 // Running the guided tour
@@ -44,15 +45,29 @@ export const visibleSteps = (
 // instance so we can. module scope because there's only ever one overlay.
 let activeTour: ReturnType<typeof driver> | undefined;
 
+// set while we're waiting for the render model page to show up
+let cancelPageSwitch: (() => void) | undefined;
+
 export const stopTour = (): void => {
+	cancelPageSwitch?.();
+	cancelPageSwitch = undefined;
 	activeTour?.destroy();
 	activeTour = undefined;
 };
 
 export const isTourRunning = (): boolean => activeTour !== undefined;
 
+type StartOptions = {
+	// runs when Done is pressed on the last step, instead of just closing
+	onDone?: () => void;
+	doneBtnText?: string;
+};
+
 export const useTour = () => {
-	const startTour = useCallback((steps: TourStep[] = TOUR_STEPS) => {
+	const startTour = useCallback((
+		steps: TourStep[] = TOUR_STEPS,
+		{onDone, doneBtnText = "Done"}: StartOptions = {}
+	) => {
 		const present = visibleSteps(
 			steps,
 			(selector) => document.querySelector(selector) !== null
@@ -71,7 +86,7 @@ export const useTour = () => {
 			allowClose: true,
 			nextBtnText: "Next",
 			prevBtnText: "Back",
-			doneBtnText: "Done",
+			doneBtnText,
 			// scopes tourTheme.css to this popover only
 			popoverClass: "ammber-tour",
 			steps: present.map(toDriveStep),
@@ -80,14 +95,40 @@ export const useTour = () => {
 			onDestroyed: () => {
 				activeTour = undefined;
 			},
+			// driver.js only closes on Done if this isn't set, so close it here
+			onDoneClick: onDone
+				? () => {
+					stopTour();
+					onDone();
+				}
+				: undefined,
 		});
 
 		activeTour = tour;
 		tour.drive();
 	}, []);
 
+	// goal list page: run its steps, then move to the render model page and carry
+	// on there. render model page: just its own steps.
+	const startForPage = useCallback((onModelPage: boolean) => {
+		if (onModelPage) {
+			startTour(tourForPage(true));
+			return;
+		}
+
+		startTour(tourForPage(false), {
+			doneBtnText: "Next",
+			onDone: () => {
+				cancelPageSwitch = goToModelPage(() => {
+					cancelPageSwitch = undefined;
+					startTour(tourForPage(true));
+				});
+			},
+		});
+	}, [startTour]);
+
 	// this is the bit that cleans up the overlay when the editor unmounts
 	useEffect(() => stopTour, []);
 
-	return {startTour, stopTour};
+	return {startTour, startForPage, stopTour};
 };
