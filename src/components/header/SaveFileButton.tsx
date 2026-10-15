@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import {JSONData, useFileContext} from "../context/FileProvider";
 import ErrorModal, {ErrorModalProps} from "../ErrorModal";
 import {returnFocusToGraph} from "../utils/GraphUtils";
+import toast from "react-hot-toast";
 
 const SaveFileButton = () => {
 	const {setJsonFileHandle, treeData, tabData, goals} = useFileContext();
@@ -69,6 +70,7 @@ const SaveFileButton = () => {
 		writable: FileSystemWritableFileStream
 	) => {
 		try {
+			//throw new Error("Test failure");
 			const jsonData: JSONData = {
 				tabData: tabData,
 				treeData: treeData || [],
@@ -77,8 +79,10 @@ const SaveFileButton = () => {
 			await writable.write(json);
 			await writable.close();
 			setJsonFileHandle(handle);
+			toast.success("Model saved successfully");
 		} catch (error) {
 			console.log(`Error initialize JSON File: ${error}`);
+			toast.error("Failed to save model");
 		}
 	};
 
