@@ -95,6 +95,7 @@ const nav: Chapter[] = [
                 anchors: [{ id: "feedbacking", title: "3.7.1. Adding feedback comments to model" }],
             },
             { id: "viewm", title: "3.8. Student Reviewing Feedback" },
+            { id: "version-control", title: "3.9. Model Versiom Control" },
         ],
     },
     { id: "bibliography", title: "Bibliography", heading: "Bibliography", children: [] },
@@ -828,6 +829,18 @@ const UserManualWeb: React.FC = () => {
                 </ol>
             </>
         ),
+        "version-control": (
+            <>
+                <h2 id="version-control">3.9. Model Vesrion Control</h2>
+                <p>AMMBER saves historical versions (checkpoints) for each model. If a modification goes wrong, or if you wish to return to a previous state,
+                    you can restore an earlier version at any time.</p>
+                <ol>
+                    <></>
+                </ol>
+            </>
+
+        ),
+
 
         /*  Bibliography  */
         "bibliography": (
