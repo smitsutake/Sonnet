@@ -95,7 +95,8 @@ const nav: Chapter[] = [
                 anchors: [{ id: "feedbacking", title: "3.7.1. Adding feedback comments to model" }],
             },
             { id: "viewm", title: "3.8. Student Reviewing Feedback" },
-            { id: "version-control", title: "3.9. Model Versiom Control" },
+            { id: "version-control", title: "3.9. Model Versiom Control" ,
+                anchors: [{ id: "saving", title: "3.9.1. Saving the current model version" }],},
         ],
     },
     { id: "bibliography", title: "Bibliography", heading: "Bibliography", children: [] },
@@ -832,11 +833,47 @@ const UserManualWeb: React.FC = () => {
         "version-control": (
             <>
                 <h2 id="version-control">3.9. Model Vesrion Control</h2>
-                <p>AMMBER saves historical versions (checkpoints) for each model. If a modification goes wrong, or if you wish to return to a previous state,
-                    you can restore an earlier version at any time.</p>
+                <p>AMMBER saves historical versions (checkpoints) of each model. If a change goes wrong, or you simply want to return to an earlier state, you can restore a previous version at any time.
+                    Version control is available on the “Editor – Enter Goals / Arrange Hierarchy” page via all functions.
+                </p>
+                <figure className="manual-figure">
+                    <img src={images["3.9-versionpage"]} alt="versionpage" />
+                </figure>
+                <h3 id="saving">3.9.1. Saving the current model version</h3>
                 <ol>
-                    <></>
+                    <li>To save the current version of your model manually, click the <img src={images["3.9-versionicon"]} alt="vcicon" className="vcicon" />  button in the header. In the dialog that opens, type a name for the checkpoint in the text box (for example, “Before restructuring goals”), then click Save checkpoint.
+                        The new checkpoint appears in the list below with a Named badge, which marks it as a manually saved version.
+                    </li>
+                    <figure className="manual-figure">
+                        <img src={images["3.9-versionblank"]} alt="versionblank" />
+                    </figure>
+                    <figure className="manual-figure">
+                        <img src={images["3.9-1check"]} alt="1check" />
+                    </figure>
+                    <li> An automatic checkpoint is also recorded whenever a student or staff member clicks <img src={images["3.9-save"]} alt="save" className="save" />  button to generate the JSON file, for example after a student finishes their model or a staff member finishes giving feedback.
+                        These checkpoints appear in the list with an Auto badge and are labelled with the date and time they were saved.
+                    </li>
+                    <figure className="manual-figure">
+                        <img src={images["3.9-auto"]} alt="auto" />
+                    </figure>
+                    <li>Click <img src={images["3.9-restore"]} alt="rs" className="rs" />  to replace the current model with the selected checkpoint.
+                        Click  <img src={images["3.9-rename"]} alt="rn" className="rn" /> to change the name of a checkpoint.
+                        Click <img src={images["3.9-delete"]} alt="delete" className="delete" />   to permanently remove a checkpoint from the list.
+                    </li>
                 </ol>
+                <div className="note">
+                    <strong>Note:</strong> Restoring a checkpoint replaces your current model,
+                    so any changes made since your last save will be lost. If you want to keep your current work, save a checkpoint before restoring
+                </div>
+                <div className="note">
+                    <strong>Note:</strong> Checkpoints are stored in your browser on this device only. They are not included in the saved JSON file, and they will not be available on another computer or browser,
+                    or after the browser data is cleared. To keep a model permanently, save it as a JSON file.
+                </div>
+                <div className="note">
+                    <strong>Note:</strong>AMMBER keeps up to 50 checkpoints. When the limit is reached,
+                    the oldest Auto checkpoints are removed first, and Named checkpoints are kept as long as possible.
+                </div>
+
             </>
 
         ),
