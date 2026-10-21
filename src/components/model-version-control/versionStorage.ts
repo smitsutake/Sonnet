@@ -1,4 +1,5 @@
 import {del, get, keys, set} from "idb-keyval";
+import {byNewest} from "./versionFormat.ts";
 import {ModelVersion} from "./versionTypes.ts";
 
 // History is kept in IndexedDB rather than localStorage because snapshots hold a
@@ -69,16 +70,16 @@ export const storedModelIds = async (): Promise<string[]> => {
 // Keeps the newest MAX_VERSIONS, but only ever drops auto checkpoints. If the
 // list is still over budget once every auto entry that can go has gone, the
 // oldest manual entries are trimmed too.
-const prune = (versions: ModelVersion[]): ModelVersion[] => {
+export const prune = (versions: ModelVersion[]): ModelVersion[] => {
 	if (versions.length <= MAX_VERSIONS) {
 		return versions;
 	}
-	const sorted = [...versions].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-	const kept: ModelVersion[] = [];
-	for (const version of sorted) {
-		if (kept.length < MAX_VERSIONS || !version.auto) {
-			kept.push(version);
-		}
-	}
-	return kept.slice(0, MAX_VERSIONS);
+	const sorted = [...versions].sort(byNewest);
+	// Manual entries claim their slots first; auto entries only get whatever
+	// budget is left over.
+	const manual = sorted.filter((v) => !v.auto).slice(0, MAX_VERSIONS);
+	const auto = sorted
+		.filter((v) => v.auto)
+		.slice(0, MAX_VERSIONS - manual.length);
+	return [...manual, ...auto].sort(byNewest);
 };
