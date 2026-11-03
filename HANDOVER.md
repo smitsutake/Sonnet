@@ -110,8 +110,7 @@ All project documentation is available in Confluence:
 | Architectural Diagram | Confluence: Requirements Sprint1 |
 | User Stories | Confluence: Requirements Sprint2 |
 | User Case Diagram (Version history) | Confluence: Requirements Sprint2 |
-| UI/UX Interaction with Version History | [Confluence: Requirements Sprint2](https://student-team-sonnet.atlassian.net/wiki/spaces/AMMBER/pages/8355857/UI+UX+Interaction+with+Version+History) |
-
+| UI/UX Interaction with Version History | Confluence: Requirements Sprint2 |
 ### Export as PDF
 
 All Confluence pages can be exported as PDF. Use the `...` menu → **Export** → **PDF** in Confluence.
