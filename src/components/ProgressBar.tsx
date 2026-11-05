@@ -38,7 +38,7 @@ const ProgressBar = ({
     };
 
     return (
-        <div style={{
+        <div data-tour="progress-bar" style={{
             width: "auto",
             minWidth: "1280px",
             overflowY: "hidden",
@@ -99,6 +99,7 @@ const ProgressBar = ({
                                                 // make button stand out on dark background colour
                                                 variant={(selectedTab === TabOptions.Graph) ? "info" : undefined}
                                                 size="xs"
+                                                tourAnchor="toggle-goal-list"
                                                 className="ms-1"/>
                     </span>
                 </div>

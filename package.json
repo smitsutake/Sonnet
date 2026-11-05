@@ -25,6 +25,7 @@
     "canvg": "^4.0.2",
     "d3": "^7.9.0",
     "dnd-kit-sortable-tree": "^0.1.73",
+    "driver.js": "^1.8.0",
     "file-saver": "^2.0.5",
     "idb-keyval": "^6.2.1",
     "jsdom": "^26.0.0",
