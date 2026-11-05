@@ -8,6 +8,8 @@ import FileUploadSection from "./FileUploadSection";
 import {JSONData, useFileContext} from "./context/FileProvider";
 import {reset} from "./context/treeDataSlice.ts";
 import {TabContent, TreeGoal} from "./types.ts";
+import {useFeedbackContext} from "./feedback/feedbackContext";
+import {parseFeedbackData} from "./feedback/feedbackTypes";
 
 const EMPTY_FILE_ALERT = "Please select a file";
 const JSON_FILE_ALERT = "Please select a JSON file.";
@@ -52,12 +54,23 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 	const [jsonFile, setJsonFile] = useState<File | null>(null);
 	const [isJsonDragOver, setIsJsonDragOver] = useState(false);
 	const [errorModal, setErrorModal] = useState<ErrorModalProps>(defaultModalState);
+	// Which button opened the file-drop flow, so Upload knows whether to allow
+	// feedback/marking access for the model it lands on.
+	const [openIntent, setOpenIntent] = useState<"open" | "review" | "mark">("open");
 
 	const jsonFileRef = useRef<HTMLInputElement>(null);
 
 	const navigate = useNavigate();
 
 	const {dispatch} = useFileContext();
+	const {loadItems, reviewerName, setReviewMode} = useFeedbackContext();
+
+	// Pulls the feedback block off a freshly parsed file and hands it to the
+	// feedback session. Called for every open, not just teaching-staff opens,
+	// so that a student opening a reviewed file sees the comments too.
+	const loadFeedbackFromFile = (data: JSONData) => {
+		loadItems(parseFeedbackData(data.feedback));
+	};
 
 	// Handle Create Model button click - load default data
 	const handleCreateModel = () => {
@@ -65,6 +78,10 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 			treeData: defaultTreeData,
 			tabData: createDefaultTabData()
 		}));
+		// A brand new model carries no feedback, and must not inherit whatever
+		// was loaded from a file earlier in this session.
+		loadItems(null);
+		setReviewMode(false);
 	};
 
 	const handleJSONFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -101,6 +118,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                                 tabData: initialTabs,
                                 treeData: convertedJsonData.treeData,
                             }));
+							loadFeedbackFromFile(convertedJsonData);
 							// File imported successfully, user can now click Upload button to navigate
 							console.log("File imported successfully");
 						} else {
@@ -157,6 +175,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
                         tabData: initialTabs,
                         treeData: convertedJsonData.treeData,
                     }));
+					loadFeedbackFromFile(convertedJsonData);
 					
 					// File imported successfully, user can now click Upload button to navigate
 					console.log("File imported successfully (file input)");
@@ -178,6 +197,7 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 		<div className="d-flex justify-content-center mt-3">
 			{/* Error Modal while user upload wrong types or invalid files */}
 			<ErrorModal {...errorModal} />
+
 
 			{/* File Input */}
 			<input
@@ -223,21 +243,23 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 							variant="primary"
 							size="lg"
 							disabled={!jsonFile ? true : false}
-							onClick={() => navigate("/projectEdit")}
+							onClick={() => {
+								setReviewMode(openIntent !== "open");
+								navigate("/projectEdit");
+							}}
 						>
 							Upload
 						</Button>
 					</div>
 				</>
 			) : (
-				<>
+				<div className="d-flex justify-content-center gap-5">
 					{/* Link section is bigger than Button section, click outside Button could trigger navigation,
              hard code a static height for temporary, need a better solution
           */}
-					<Button 
-						variant="primary" 
+					<Button
+						variant="primary"
 						size="lg"
-						className="me-5"
 						onClick={() => {
 							handleCreateModel();
 							navigate("/projectEdit");
@@ -248,12 +270,46 @@ const WelcomeButtons = ({isDragging, setIsDragging}: WelcomeButtonsProps) => {
 					<Button
 						variant="primary"
 						size="lg"
-						onClick={() => setIsDragging(true)}
-						className="align-self-start ms-5"
+						onClick={() => {
+							setOpenIntent("open");
+							setIsDragging(true);
+						}}
 					>
 						Open Model
 					</Button>
-				</>
+
+					{/* Review Model is only available through this button, so a model
+					    opened via Open Model never exposes feedback. Staff mode has
+					    Mark model instead, so this is hidden there. */}
+					{reviewerName === null && (
+						<Button
+							variant="primary"
+							size="lg"
+							onClick={() => {
+								setOpenIntent("review");
+								setIsDragging(true);
+							}}
+						>
+							Review Model
+						</Button>
+					)}
+
+					{/* Only in staff mode. Create and Open are unchanged; this is
+					    the one extra thing staff can do, so it sits alongside them
+					    rather than replacing anything. */}
+					{reviewerName !== null && (
+						<Button
+							variant="primary"
+							size="lg"
+							onClick={() => {
+								setOpenIntent("mark");
+								setIsDragging(true);
+							}}
+						>
+							Mark model
+						</Button>
+					)}
+				</div>
 			)}
 		</div>
 	);

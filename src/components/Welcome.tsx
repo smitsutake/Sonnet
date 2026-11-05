@@ -7,6 +7,7 @@ import WelcomeButtons from "./WelcomeButtons";
 import {DetailCarousel} from "./DetailCarousel";
 import PaperReferenceList from "./PaperReferenceList";
 import {papers} from "../data/papers";
+import StaffModeButton from "./feedback/StaffModeButton";
 
 const Welcome = () => {
 	const [isDragging, setIsDragging] = useState(false);
@@ -25,7 +26,12 @@ const Welcome = () => {
 			id="bg"
 			style={{minHeight: "inherit"}}
 		>
-			<WelcomeHeader/>
+			{/* Top-right, clear of the main actions: it switches mode rather
+			    than doing anything to a model. */}
+			<div className="position-absolute top-0 end-0 p-3" style={{zIndex: 10}}>
+				<StaffModeButton />
+			</div>
+			<WelcomeHeader />
 			<div>
 				<DetailCarousel/>
 				<WelcomeButtons isDragging={isDragging} setIsDragging={setIsDragging}/>
