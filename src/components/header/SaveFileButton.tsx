@@ -3,9 +3,20 @@ import Button from "react-bootstrap/Button";
 import {JSONData, useFileContext} from "../context/FileProvider";
 import ErrorModal, {ErrorModalProps} from "../ErrorModal";
 import {returnFocusToGraph} from "../utils/GraphUtils";
+import toast from "react-hot-toast";
+import {useFeedbackContext} from "../feedback/feedbackContext";
+import {buildFeedbackData} from "../feedback/feedbackTypes";
+import {newModelId} from "../context/modelId.ts";
+import {useVersionHistory} from "../model-version-control/versionContext.ts";
 
 const SaveFileButton = () => {
-	const {setJsonFileHandle, treeData, tabData, goals} = useFileContext();
+	const {setJsonFileHandle, treeData, tabData, goals, modelId} = useFileContext();
+	const {items: feedbackItems, reviewerName, fileHadFeedback} =
+		useFeedbackContext();
+	// Every successful save doubles as an automatic Version History
+	// checkpoint -- the whole point of "auto-save on Save" is that the user
+	// does not have to remember to do anything extra to get one.
+	const {saveCheckpoint} = useVersionHistory();
 
 	const [errorModal, setErrorModal] = useState<ErrorModalProps>({
 		show: false,
@@ -69,16 +80,35 @@ const SaveFileButton = () => {
 		writable: FileSystemWritableFileStream
 	) => {
 		try {
+			//throw new Error("Test failure");
+			// Every save now carries a feedback block. A model that has never been
+			// reviewed is stamped "unfeedbacked" rather than left without the key,
+			// so that the absence of review is explicit from this version onward.
+			//
+			// A file counts as reviewed if a reviewer is signed in during this
+			// save, or if it already arrived carrying feedback -- otherwise a
+			// student re-saving a reviewed model would silently downgrade it.
+			const wasReviewed = reviewerName !== null || fileHadFeedback;
+			// modelId is only ever null for the instant between mount and
+			// FileProvider's own effect minting the first one (see FileProvider.tsx)
+			// -- unreachable once the user can actually click Save, but fall back
+			// rather than write a file Version History could never key a
+			// checkpoint on.
 			const jsonData: JSONData = {
 				tabData: tabData,
 				treeData: treeData || [],
+				feedback: buildFeedbackData(feedbackItems, wasReviewed),
+				modelId: modelId ?? newModelId(),
 			};
 			const json = JSON.stringify(jsonData);
 			await writable.write(json);
 			await writable.close();
 			setJsonFileHandle(handle);
+			await saveCheckpoint();
+			toast.success("Model saved successfully");
 		} catch (error) {
 			console.log(`Error initialize JSON File: ${error}`);
+			toast.error("Failed to save model");
 		}
 	};
 

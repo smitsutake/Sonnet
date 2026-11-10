@@ -7,6 +7,7 @@ import WelcomeButtons from "./WelcomeButtons";
 import {DetailCarousel} from "./DetailCarousel";
 import PaperReferenceList from "./PaperReferenceList";
 import {papers} from "../data/papers";
+import StaffModeButton from "./feedback/StaffModeButton";
 
 const Welcome = () => {
 	const [isDragging, setIsDragging] = useState(false);
@@ -25,20 +26,31 @@ const Welcome = () => {
 			id="bg"
 			style={{minHeight: "inherit"}}
 		>
+			{/* Top-right, clear of the main actions: it switches mode rather
+			    than doing anything to a model. */}
+			<div className="position-absolute top-0 end-0 p-3" style={{zIndex: 10}}>
+				<StaffModeButton />
+			</div>
 			<WelcomeHeader />
 			<div>
-				<DetailCarousel />
-				<WelcomeButtons isDragging={isDragging} setIsDragging={setIsDragging} />
+				<DetailCarousel/>
+				<WelcomeButtons isDragging={isDragging} setIsDragging={setIsDragging}/>
 			</div>
-			<WelcomeFooter onPapersClick={() => setShowPapers(true)} />
+			<WelcomeFooter onPapersClick={() => setShowPapers(true)}/>
 
 			{/* Papers Modal */}
-			<Modal show={showPapers} onHide={() => setShowPapers(false)} size="lg" centered>
+			<Modal
+				show={showPapers}
+				onHide={() => setShowPapers(false)}
+				size="lg"
+				centered
+				scrollable
+			>
 				<Modal.Header closeButton>
-					<Modal.Title>Papers &amp; User Manual</Modal.Title>
+					<Modal.Title>Research Report Series</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<PaperReferenceList references={papers} />
+					<PaperReferenceList references={papers}/>
 				</Modal.Body>
 				<Modal.Footer>
 					<Button variant="secondary" onClick={() => setShowPapers(false)}>

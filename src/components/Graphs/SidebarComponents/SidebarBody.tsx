@@ -16,16 +16,16 @@ const SidebarBody = ({graph, recentreView, className}: SidebarProps) => {
 
     return (
         <div className={`border border-black p-1 rounded ${className}`}>
-            <CollapsibleSidebarCard isOpen title="Zoom">
+            <CollapsibleSidebarCard isOpen title="Zoom" tourAnchor="tool-zoom">
                 <ZoomButtons recentreView={recentreView}/>
             </CollapsibleSidebarCard>
-            <CollapsibleSidebarCard title="Colour">
+            <CollapsibleSidebarCard title="Colour" tourAnchor="tool-colour">
                 <ColorButtons graph={graph}/>
             </CollapsibleSidebarCard>
-            <CollapsibleSidebarCard title="Font size">
+            <CollapsibleSidebarCard title="Font size" tourAnchor="tool-font-size">
                 <ScaleTextButton/>
             </CollapsibleSidebarCard>
-            <CollapsibleSidebarCard title="Line visibility">
+            <CollapsibleSidebarCard title="Line visibility" tourAnchor="tool-lines">
                 <LineButtons/>
             </CollapsibleSidebarCard>
         </div>

@@ -1,3 +1,8 @@
+declare global {
+    interface Window {
+        __dragSource?: string | null;
+    }
+}
 import {useEffect, useRef} from "react";
 import {Graph, MaxToolbar, Cell, CellStateStyle, Geometry, Point, gestureUtils} from "@maxgraph/core";
 
@@ -115,6 +120,10 @@ const SidebarItems = ({graph, className=""}: SidebarItemsProps) => {
             symbol.imagePath
         );
         sidebarItem.style.width = (symbol.type === "Stakeholder") ? "30px" : "60px";
+        // Mark drag source as sidebar on mousedown; cleared globally on mouseup
+        sidebarItem.addEventListener('mousedown', () => {
+            window.__dragSource = 'sidebar';
+        });
 
         gestureUtils.makeDraggable(sidebarItem, graph, dragAndDropHandler);
     };
@@ -146,6 +155,8 @@ const SidebarItems = ({graph, className=""}: SidebarItemsProps) => {
     }, [divSidebar.current]);
 
     return <div className={`border border-black p-1 rounded ${className}`}
+                // guide anchor, see components/tour/tourSteps.ts
+                data-tour="shape-palette"
                 ref={divSidebar}/>;
 };
 

@@ -26,6 +26,7 @@ import {registerCustomShapes} from "./GraphShapes";
 import "./GraphWorker.css";
 import {useFileContext} from "../context/FileProvider.tsx";
 import {useGraph} from "../context/GraphContext";
+import {useFeedbackContext} from "../feedback/feedbackContext.ts";
 import {Cluster, GlobObject, InstanceId, TreeGoal} from "../types.ts";
 import GraphSidebar from "./GraphSidebar";
 import WarningMessage from "./WarningMessage";
@@ -37,6 +38,7 @@ import ConfirmModal from "../ConfirmModal.tsx";
 import {parseGoalRefId} from "../utils/GraphUtils";
 import {fixEditorPosition, returnFocusToGraph} from "../utils/GraphUtils.tsx";
 import {addGoalToTab, addGoalToTree} from "../context/treeDataSlice.ts";
+import toast from "react-hot-toast";
 
 //Graph id & Side bar id
 const GRAPH_DIV_ID = "graphContainer";
@@ -60,6 +62,12 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
     const divGraph = useRef<HTMLDivElement>(null);
     const {cluster, dispatch, treeIds, showLineBetweenNonFunctionalGoals, treeData, goals} = useFileContext();
     const {graph, setGraph} = useGraph();
+    // The feedback panel appears for a reviewer writing comments, and also for
+    // anyone opening a file that already carries feedback (see the matching
+    // showFeedbackSection check in SectionPanel). Neither of them is editing
+    // the model, so the shape palette and styling tools have no use either way.
+    const {reviewerName, fileHadFeedback, isReviewMode} = useFeedbackContext();
+    const isReviewing = isReviewMode && (reviewerName !== null || fileHadFeedback);
     const treeIdsRef = useRef(treeIds);
     treeIdsRef.current = treeIds;
     // Guards against dispatching stale positions while renderGraph is rebuilding cells.
@@ -637,7 +645,6 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         if (!showGraphSection || !graph || !divGraph.current) return;
 
         const container = divGraph.current;
-        let lastBounds: { width: number; height: number } | null = null;
 
         const observer = new ResizeObserver(() => {
             const bounds = graph.getGraphBounds();
@@ -645,18 +652,11 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
 
             const {width, height} = bounds;
 
-            // Wait until graph has valid size
+            // Wait until graph has valid size, then center and stop observing.
+            // don't wait for a 2nd resize, sometimes there isn't one and it never centres
             if (width > 0 && height > 0) {
-
-                // Check if bounds are stable (same as last frame)
-                if (lastBounds && lastBounds.width === width && lastBounds.height === height) {
-                    // Graph is finalized -> center and stop observing
-                    recentreView(graph);
-                    observer.disconnect();
-                } else {
-                    // Store bounds for next frame
-                    lastBounds = {width, height};
-                }
+                recentreView(graph);
+                observer.disconnect();
             }
         });
 
@@ -666,7 +666,36 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
         return () => observer.disconnect();
     }, [showGraphSection, graph]);
 
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const source = window.__dragSource;
+            if (source === 'sidebar') {
+                const rect = divGraph.current?.getBoundingClientRect();
+                if (rect) {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    const isOver = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+                    setIsDragOver(isOver);
+                }
+            } else {
+                setIsDragOver(false);
+            }
+        };
 
+        // Global mouseup clears the drag source, regardless of where the drag ends
+        const handleMouseUp = () => {
+            window.__dragSource = null;
+            setIsDragOver(false);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
 // Keyboard shortcuts: Save, Export, Select All, Duplicate
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -767,7 +796,9 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                     dispatch(addGoalToTab(newGoal));
                     dispatch(addGoalToTree(newGoal));
                 });
-
+                //display duplicated massage
+                const count = selectedCells.length;
+                toast.success(`Duplicated ${count} node${count > 1 ? 's' : ''}`);
                 // Data changes automatically trigger re-render via Redux
                 return;
             }
@@ -826,11 +857,15 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                 }
             />
             <Container>
+                {/* The sidebar sits to the right of the canvas. Hidden entirely
+                    while reviewing: a reviewer only reads and comments on the
+                    model. */}
                 <Row className="row">
-                    <Col md={10}>
+                    <Col md={isReviewing ? 12 : 10}>
                         <div
                             id={GRAPH_DIV_ID}
                             data-cy="graph-canvas"
+                            data-tour="model-canvas"
                             ref={divGraph}
                             tabIndex={0}
                             style={{
@@ -838,18 +873,13 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                                 border: isDragOver ? '3px dashed #4A90D9' : 'none',
                                 transition: 'border 0.2s ease',
                             }}
-                            onDragEnter={() => setIsDragOver(true)}
-                            onDragLeave={(e) => {
-                                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                                    setIsDragOver(false);
-                                }
-                            }}
-                            onDrop={() => setIsDragOver(false)}
                         />
                     </Col>
-                    <Col md={2}>
-                        <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
-                    </Col>
+                    {!isReviewing && (
+                        <Col md={2}>
+                            <GraphSidebar graph={graph} recentreView={() => graph && recentreView(graph)} />
+                        </Col>
+                    )}
                 </Row>
                 {cluster.ClusterGoals.length === 0 && (
                     <div style={{
@@ -862,8 +892,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                         pointerEvents: 'none',
                         zIndex: 10,
                     }}>
-                        <p style={{fontSize: '20px'}}>🖼️ The canvas is empty</p>
-                        <p style={{fontSize: '14px'}}>Drag a symbol from the left toolbar onto the canvas
+                        <p style={{fontSize: '20px'}}>Drag a symbol from the right toolbar onto the canvas
                             to start modeling</p>
                     </div>
                 )}
@@ -877,5 +906,6 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
 };
 
 // ---------------------------------------------------------------------------
+/* Hide maxGraph's default drag preview (black dashed border) */
 
 export default GraphWorker;

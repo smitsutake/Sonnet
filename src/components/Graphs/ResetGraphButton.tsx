@@ -17,7 +17,11 @@ const ResetGraphButton: React.FC<ResetGraphProps>  = ({variant="", className=""}
 	const {dispatch} = useFileContext();
 
     return (
-        <DropdownButton as={ButtonGroup} title="Reset" variant={variant} className={`${className} btn-reset-hover`}>
+        <DropdownButton as={ButtonGroup}
+                        title="Reset"
+                        variant={variant}
+                        data-tour="reset-model"
+                        className={`${className} btn-reset-hover`}>
             <Dropdown.Item onClick={() => dispatch(reset())}>Empty</Dropdown.Item>
             <Dropdown.Item onClick={() => dispatch(reset({
                                               treeData: defaultTreeData,

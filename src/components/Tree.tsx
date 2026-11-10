@@ -288,6 +288,10 @@ const TreeRow = React.forwardRef<HTMLDivElement, TreeRowProps>(({
                     transition: "background-color 0.15s ease",  // Smooth background transition for better UX
                 }}
                 className="tree-list"
+                // Anchor for the feedback overlay. Feedback arrows locate goal rows
+                // by these attributes; see components/feedback/FeedbackArrows.tsx.
+                data-goal-instance={treeItem.instanceId}
+                data-goal-id={treeItem.id}
                 onDoubleClick={() => {
                     if (!isEditing && !isEmptyGoal(treeItem)) {
                         handleEdit();
@@ -513,9 +517,7 @@ const Tree: React.FC<TreeProps> = ({
                     textAlign: "center",
                     padding: "20% 2rem 2rem 2rem",
                 }}>
-                    <p style={{fontSize: "18px", margin: 0}}>📂 Drag goals here to build your hierarchy</p>
-                    <p style={{fontSize: "14px", marginTop: "8px"}}>
-                        Select goals from the left panel and drag them into this area
+                    <p style={{fontSize: "18px", margin: 0}}>📂 Drag goals here to build your hierarchy
                     </p>
                 </div>
             ) : (
