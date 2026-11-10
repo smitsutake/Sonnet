@@ -752,6 +752,7 @@ const GraphWorker: React.FC<{ showGraphSection?: boolean }> = ({showGraphSection
                     return null;
                 };
 
+                // Process each selected cell
                 // Get the maximum existing ID to generate unique new IDs
                 const maxId = Math.max(0, ...Object.keys(goals).map(Number));
 
