@@ -5,13 +5,19 @@ import "./ProjectEdit.css";
 import SectionPanel from "./SectionPanel";
 import ProgressBar from "./ProgressBar";
 import {GraphProvider} from "./context/GraphContext";
+import {useAutoTour} from "./tour/useAutoTour.ts";
+import VersionHistoryProvider from "./model-version-control/VersionHistoryProvider";
 
 const ProjectEdit: React.FC = () => {
     const [showGoalSection, setShowGoalSection] = useState(true);
     const [showGraphSection, setShowGraphSection] = useState(false);
 
+    // opens the guide once the editor is on screen, Guide button replays it
+    useAutoTour();
+
     return (
         <GraphProvider>
+          <VersionHistoryProvider>
             <ProjectEditHeader showGoalSection={showGoalSection}
                                setShowGoalSection={setShowGoalSection}
                                showGraphSection={showGraphSection}/>
@@ -22,6 +28,7 @@ const ProjectEdit: React.FC = () => {
                           showGraphSection={showGraphSection}
                           setShowGoalSection={setShowGoalSection}
                           paddingX={15}/>
+          </VersionHistoryProvider>
         </GraphProvider>
     );
 };
