@@ -240,4 +240,17 @@ US-VH-04	AMBR-39	(Add TC ID)	In progress
 US-VH-05	AMBR-40	(Add TC ID)	In progress
 (Expand this table with all user stories from Confluence.)
 
+### Known CI/CD Issues at Handover
+
+During the final handover, the automated pipelines on the `main` branch failed. Note that **the application code itself is fully functional, built, and tested locally**; these failures are strictly due to outdated CI/CD configurations on `main`. There are three root causes:
+
+1. **CI/CD Pipeline (Node.js Version Mismatch):** The build fails because the workflow uses an older Node.js version (v18), while the latest Vite dependencies require Node.js v20+.
+2. **Deploy (Cypress Timeout):** The deployment fails during E2E testing because the Cypress runner times out trying to connect to the Vite dev server (`Socket closed before connection`).
+3. **Release Version (Duplicate Git Tag):** The release workflow fails because the script attempts to create a version tag (`2026.1`) that already exists from a previous commit.
+
+**Suggested Fix for Future Maintainers:**
+- Update all `node-version` fields in `.github/workflows/` to `'20'` or `'lts/*'`.
+- Add the `--host` flag to the Vite dev server command and increase Cypress wait-on timeout.
+- Add a check in the `release-version.yml` script to verify if a tag exists before attempting to create it.
+
 Last updated: (26/04/11)
