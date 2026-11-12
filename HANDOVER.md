@@ -20,7 +20,7 @@ This document is the handover package for the AMMBER project. It is written for 
 10. [Architecture & Key Components](#10-architecture--key-components)
 11. [Key Algorithms](#11-key-algorithms)
 12. [Data Documentation](#12-data-documentation)
-13. [Deployment & Known CI/CD Issues](#13-deployment--known-cicd-issues)
+13. [Deployment](#13-deployment)
 14. [Outstanding Items & Future Work](#14-outstanding-items--future-work)
 15. [Access & Ownership Transfer](#15-access--ownership-transfer)
 16. [License](#16-license)
@@ -46,7 +46,9 @@ The tool supports building, arranging, rendering, exporting, and reviewing motiv
 
 ## 2. Demo
 
-**Live Demo:** the app is not hosted as part of this handover. To run it locally, see Section 6. Notes on deploying it to GitHub Pages are in Section 13.
+**Live Demo:** https://smitsutake.github.io/mm-local-editor/
+
+The demo is deployed automatically from the `develop` branch. After the repository is transferred, the address changes to `https://<new owner>.github.io/mm-local-editor/` (see Section 13).
 
 **Repository:**
 - Main: `MotivationalModelling/mm-local-editor` (the original editor this project is based on)
@@ -213,7 +215,7 @@ Press Ctrl + C in the terminal.
 
 ### Deployment
 
-Deployment to GitHub Pages is automated with GitHub Actions, but the app is not hosted at handover. See Section 13 and `.github/workflows/` for details.
+The application is deployed to GitHub Pages automatically by GitHub Actions on every push to `develop`: https://smitsutake.github.io/mm-local-editor/. See Section 13 and `.github/workflows/` for details.
 
 ---
 
@@ -292,7 +294,7 @@ All test files are under `src/components/`. End-to-end tests for deleting goals 
 
 This section is for the client. No programming knowledge is needed.
 
-- **Open the app:** the app is not hosted at handover. A developer can run it locally (Section 6) or deploy it to GitHub Pages (Section 13).
+- **Open the app:** https://smitsutake.github.io/mm-local-editor/ (after the transfer, `smitsutake` in this address is replaced by your GitHub account name).
 - **How to use it:** click **User Manual** at the bottom of the welcome page, or open `public/papers/AMMBER_User_Manual.pdf`. A step-by-step **Guide** (guided tour) also opens automatically when you enter the editor, and can be reopened at any time with the **Guide** button.
 - **Saving a model:** clicking **Save** (or Ctrl+S / Cmd+S) writes the model to a `.json` file on your computer. Keep these files somewhere safe (for example, a cloud-synced folder). The `.json` file is the only permanent copy of a model.
 - **Version history stays in your browser.** Every Save also creates an automatic checkpoint, and you can save named checkpoints by hand. These checkpoints are stored inside the browser, not in the `.json` file. They will not appear if you open the model in a different browser or on a different computer, and they are lost if you clear your browser data. Up to 50 checkpoints are kept per model; when the limit is reached, the oldest automatic checkpoints are removed first.
@@ -394,33 +396,24 @@ Defined by `JSONData` in `src/components/context/FileProvider.tsx`.
 
 ---
 
-## 13. Deployment & Known CI/CD Issues
+## 13. Deployment
 
-### Workflows
+`develop` is the default branch. Every push to `develop` runs the CI/CD pipeline in `.github/workflows/ci-cd.yml`:
 
-Three GitHub Actions workflows are in `.github/workflows/`:
+1. Unit tests (Vitest), a build check and Cypress E2E tests, on Node 20
+2. If all checks pass, deployment to GitHub Pages with `npm run deploy` (`gh-pages`)
 
-| Workflow | Trigger | What it does |
-|---|---|---|
-| `ci-cd.yml` | Push to any branch; pull requests into `develop` | Runs unit tests, a build check and Cypress E2E tests (Node 20). On a push to `develop`, it then deploys to GitHub Pages with `npm run deploy` (`gh-pages`). |
-| `deploy.yml` | Push to `main` | Builds the app (Node 18) and publishes `dist/` to GitHub Pages. |
-| `release-version.yml` | Push to `main` | Creates the next version tag in the form `YEAR.N` (e.g. `2026.1`) and updates `version` in `package.json`. |
+All checks pass on `develop`, and the deployed app is at https://smitsutake.github.io/mm-local-editor/.
 
-All checks pass on `develop`.
+### Workflows Inherited from the Original Editor
 
-### Known CI/CD Issues at Handover
+`deploy.yml` and `release-version.yml` come unchanged from the original editor (`MotivationalModelling/mm-local-editor`) and run only on pushes to `main`. The team deliberately left them, and the original test setup, as they were, because they belong to the client's original configuration. They are not part of the current pipeline.
 
-During the final handover, the automated pipelines on the `main` branch failed. Note that the application code itself is fully functional, built, and tested (all checks pass on `develop`); these failures are strictly due to outdated CI/CD configurations. There are three root causes:
+If the client decides to use `main` again, these settings need updating first:
 
-- **Deploy (Node.js Version Mismatch):** `deploy.yml` builds with Node.js v18, while the latest Vite dependencies require Node.js v20+.
-- **CI/CD (Cypress Timeout):** in `ci-cd.yml`, Cypress times out trying to connect to the Vite dev server (`Socket closed before the connection was established`). This happened on `main` even though the same job passes on `develop`, so it is likely an intermittent issue on the GitHub runner.
-- **Release Version (Duplicate Git Tag):** `release-version.yml` tries to create a version tag (`2026.1`) that already exists. The workflow checks out with `fetch-depth: 1`, so `git describe` cannot see the existing tag and the version calculation starts again from `YEAR.1`.
-
-### Suggested Fix for Future Maintainers
-
-- Update `node-version` in `.github/workflows/deploy.yml` to `'20'` or `'lts/*'`.
-- In `ci-cd.yml`, add the `--host` flag to the Vite dev server command and increase the Cypress `wait-on` timeout.
-- In `release-version.yml`, use `fetch-depth: 0` and check whether a tag already exists before creating it.
+- `deploy.yml` builds with Node 18, while Vite 8 needs Node 20 or later. Change `node-version` to `'20'`.
+- `release-version.yml` checks out with `fetch-depth: 1`, so it cannot see the existing tag `2026.1` and tries to create it again. Use `fetch-depth: 0`.
+- On `main`, the Cypress step in `ci-cd.yml` timed out waiting for the Vite dev server (it passes on `develop`). If this happens again, add `--host` to the dev server command and increase the `wait-on` timeout.
 
 ### GitHub Pages after the Transfer
 
@@ -456,7 +449,6 @@ The following features were built and shown to the client, but rejected because 
 | Grading in the User Manual | The manual describes grading, which is not included in the delivered version. See the note in Section 4. |
 | Staff mode is not access control | The "Are you a teacher?" step is a placeholder. Anyone can enter Staff mode. The code is structured so a real password check can replace it later without changing the rest of the feature (`TeacherGateModal.tsx`). |
 | Version history is tied to one browser | Checkpoints are stored in IndexedDB and are not included in the `.json` file, so they do not move with the file. |
-| CI/CD on `main` | See Section 13. |
 
 ### Suggested Future Improvements
 
