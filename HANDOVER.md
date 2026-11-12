@@ -60,7 +60,7 @@ The tool supports building, arranging, rendering, exporting, and reviewing motiv
 
 Features are organized by sprint. Each feature corresponds to one or more Jira tasks and a GitHub branch.
 
-### Sprint 1
+### Sprint 1 (2 Aug – 5 Sep)
 
 - Feedback data model [AMBR-9]
 - Grading data model and scoring [AMBR-10] (Implemented on the `grade-system` branch, then rejected by client; not included in `develop`)
@@ -74,24 +74,23 @@ Features are organized by sprint. Each feature corresponds to one or more Jira t
 - Theme application across UI [AMBR-25] (Rejected by client, not implemented)
 - Hover feedback on action buttons [AMBR-26]
 
-### Sprint 2
+### Sprint 2 (7 Sep – 10 Oct)
 
 - Auto-save version checkpoint [AMBR-36]
 - Manually save a named checkpoint [AMBR-37]
 - View list of saved versions [AMBR-38]
 - Restore a previous version [AMBR-39]
 - Rename or delete a saved version [AMBR-40]
-- driver.js guided tour [AMBR-20, AMBR-21, AMBR-22]
+- driver.js guided tour [AMBR-55 prototype, AMBR-20, AMBR-21, AMBR-22]
 - Manual audit and update [AMBR-16, AMBR-17, AMBR-18, AMBR-19]
+- Refactor SectionPanel for testability [AMBR-49]
 
-### Sprint 3
+### Sprint 4 (11 Oct – 25 Oct)
 
-- Triage and log known bugs [AMBR-27]
-- Fix data structure sync bugs [AMBR-28]
-- Set up weekly debug session [AMBR-29]
-- Debug session: Goal List pane [AMBR-30]
-- Debug session: Hierarchy & Model [AMBR-31]
-- Log & prioritise new debug findings [AMBR-32]
+Sprint numbers follow Jira. Sprint 3 was planned for debugging and then removed from Jira; that work was carried out under Sprint 4.
+
+- Unit tests for bug fixes, including the data structure sync fixes [AMBR-33]
+- User experience testing sessions with three participants [AMBR-35]
 
 ### UI/UX Improvements (Cross-Sprint)
 
@@ -116,9 +115,9 @@ Project documentation was written in the team's Confluence space, which the clie
 | Requirement Document (including the motivational model) | `docs/requirements.pdf` |
 | User Stories | `docs/user-stories.pdf` |
 | Persona | `docs/personas.pdf` |
-| Architectural Diagram | `docs/architecture.pdf` |
+| Architectural Diagram (feedback system) | `docs/architecture.pdf` |
 | Test Plan | `docs/test-plan.pdf` |
-| Client Meeting Logs | `docs/meeting-logs/` (one PDF per meeting) |
+| Client Meeting Logs | `docs/client-meeting-logs/` (one PDF per meeting) |
 | User Manual (PDF) | `public/papers/AMMBER_User_Manual.pdf` |
 | User Manual (web) | In the app at `/user-manual-web` (opened from the welcome page footer); source in `src/UserManual/` |
 | Sample models for testing | `sample-models/` (see `sample-models/README.md`) |
@@ -214,28 +213,26 @@ Press Ctrl + C in the terminal.
 
 ### Deployment
 
-The application is deployed via GitHub Actions to GitHub Pages. See Section 13 and `.github/workflows/` for details.
+Deployment to GitHub Pages is automated with GitHub Actions, but the app is not hosted at handover. See Section 13 and `.github/workflows/` for details.
 
 ---
 
 ## 7. Changelog
 
-### Sprint 3
+### Sprint 4 (11 Oct – 25 Oct)
 
-- Triage and log known bugs
-- Fix data structure sync bugs
-- Weekly debug sessions
+- Unit tests for the data structure sync fixes
+- User experience testing sessions
 - All feature branches merged into `develop`
 
-### Sprint 2
+### Sprint 2 (7 Sep – 10 Oct)
 
-- Feedback system: data model, comment linking, arrow routing, focused layout, plain-model export, welcome entry point
 - Version history: auto-save, manual save, view list, restore, rename/delete
 - driver.js guided tour: onboarding, tooltips, step counting, model toolbar steps
 - User manual audit and updates
 - UI/UX improvements: Papers modal, empty state guidance, drag highlight, keyboard shortcuts, Ctrl+E export menu shortcut, Toast notifications
 
-### Sprint 1
+### Sprint 1 (2 Aug – 5 Sep)
 
 - Feedback data model [AMBR-9]
 - Grading data model and scoring [AMBR-10] (Implemented on the `grade-system` branch, then rejected by client; not included in `develop`)
@@ -275,9 +272,9 @@ This table links each feature to the Jira task that implemented it and the tests
 | US-VH-03 View list of saved versions | AMBR-38 | Manual | Done |
 | US-VH-04 Restore a previous version | AMBR-39 | Manual | Done |
 | US-VH-05 Rename or delete a saved version | AMBR-40 | Manual | Done |
-| driver.js guided tour | AMBR-20, AMBR-21, AMBR-22 | `tour/tourSteps.test.ts`, `tour/tourFlow.test.ts`, `tour/tourLifecycle.test.ts`, `tour/tourPolicy.test.ts`, `tour/useTour.test.ts`, `tour/useAutoTour.test.ts` | Done |
+| driver.js guided tour | AMBR-20, AMBR-21, AMBR-22, AMBR-55 | `tour/tourSteps.test.ts`, `tour/tourFlow.test.ts`, `tour/tourLifecycle.test.ts`, `tour/tourPolicy.test.ts`, `tour/useTour.test.ts`, `tour/useAutoTour.test.ts` | Done |
 | User manual audit and update | AMBR-16 to AMBR-19 | Manual (reviewed against the app) | Done |
-| Fix data structure sync bugs | AMBR-28 | `context/treeDataSlice.test.ts`, `context/FileProvider.test.tsx` | Done |
+| Unit tests for bug fixes (data structure sync) | AMBR-33 | `context/treeDataSlice.test.ts`, `context/FileProvider.test.tsx` | Done |
 | Papers modal with research report series | AMBR-43 | Manual | Done |
 | Canvas and Tree empty state guidance | AMBR-44, AMBR-47 | Manual | Done |
 | Canvas drag highlight | AMBR-45 | Manual | Done |
@@ -285,6 +282,7 @@ This table links each feature to the Jira task that implemented it and the tests
 | Keyboard shortcuts (Ctrl+S/A/D/E) | AMBR-48 | Manual | Done |
 | Ctrl+E then P/S for direct export | AMBR-54 | Manual | Ctrl+E done; P/S not implemented |
 | Toast notifications | | Manual | Done |
+| User experience testing | AMBR-35 | Three participants, no prior instruction (see Test Plan) | Done |
 
 All test files are under `src/components/`. End-to-end tests for deleting goals and changing font size are in `cypress/e2e/`.
 
