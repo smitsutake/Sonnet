@@ -1,0 +1,14 @@
+Ownership and License
+
+This repository is based on the AMMBER Motivational Model Editor
+(MotivationalModelling/mm-local-editor). Rights in that original code remain
+with its existing owner.
+
+All additions and changes made to it by COMP30022 Team Sonnet (University of
+Melbourne, Semester 2, 2026) are transferred to Prof. Leon Sterling as part of
+the project handover. Prof. Leon Sterling may use, modify, distribute and
+relicense this code without restriction.
+
+Third-party libraries used by this project are distributed under their own
+licenses. See HANDOVER.md, Section 16, and the license file included with each
+package.
