@@ -463,11 +463,11 @@ The following features were built and shown to the client, but rejected because 
 
 The GitHub repository is transferred to the client at the handover meeting (16/11/2026).
 
-| Item | Current owner | Transferred to | Status |
-|---|---|---|---|
-| GitHub repository (`smitsutake/mm-local-editor`) | smitsutake | Prof. Leon Sterling | To be completed at the handover meeting |
-| GitHub Pages (deployment) | smitsutake | Moves with the repository | To be checked after transfer (see Section 13) |
-| Confluence space | Student team | Not transferred | Key documents exported as PDF to `docs/` (see Section 4) |
+| Item | Current owner | Transferred to |
+|---|---|---|
+| GitHub repository (`smitsutake/mm-local-editor`) | smitsutake | Prof. Leon Sterling |
+| GitHub Pages (deployment) | smitsutake | Moves with the repository (see Section 13) |
+| Confluence space | Student team | Not transferred; key documents exported as PDF to `docs/` (see Section 4) |
 
 The application does not use any third-party API keys, external accounts or backend services. Deployment uses only the repository's built-in `GITHUB_TOKEN`.
 
