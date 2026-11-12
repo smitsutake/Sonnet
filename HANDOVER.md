@@ -50,7 +50,7 @@ The tool supports building, arranging, rendering, exporting, and reviewing motiv
 
 **Repository:**
 - Main: `MotivationalModelling/mm-local-editor` (the original editor this project is based on)
-- Team: `smitsutake/Sonnet` (this repository, transferred to the client at handover)
+- Team: `smitsutake/mm-local-editor` (this repository, transferred to the client at handover). It was originally named `Sonnet`; it has the same name as the original editor but is a separate repository.
 
 **Branches:** the latest, fully tested code is on the `develop` branch. All feature branches have been merged into `develop`, and all CI checks on `develop` pass.
 
@@ -176,8 +176,8 @@ AMMBER is a **local-first application**:
 
 ```bash
 # Clone the repository
-git clone https://github.com/smitsutake/Sonnet.git
-cd Sonnet
+git clone https://github.com/smitsutake/mm-local-editor.git
+cd mm-local-editor
 
 # Use the latest code
 git checkout develop
@@ -424,7 +424,7 @@ During the final handover, the automated pipelines on the `main` branch failed. 
 
 ### GitHub Pages after the Transfer
 
-- The app runs under the path `/mm-local-editor/` (`basename` in `src/App.tsx`), but GitHub Pages serves a repository at `https://<owner>.github.io/<repository name>/`. If the repository is still named `Sonnet`, the page may load blank. Renaming the repository to `mm-local-editor` fixes this without changing any code.
+- The app runs under the path `/mm-local-editor/` (`basename` in `src/App.tsx`), but GitHub Pages serves a repository at `https://<owner>.github.io/<repository name>/`. The repository was therefore renamed from `Sonnet` to `mm-local-editor`, so the Pages URL matches this path without changing any code. If the repository is renamed again, the page will load blank unless `basename` is changed to match.
 - After the transfer, check **Settings → Pages** (source: `gh-pages` branch) and **Settings → Actions → General → Workflow permissions** ("Read and write", needed for deployment).
 
 ---
@@ -473,7 +473,7 @@ The GitHub repository is transferred to the client at the handover meeting (16/1
 
 | Item | Current owner | Transferred to | Status |
 |---|---|---|---|
-| GitHub repository (`smitsutake/Sonnet`) | smitsutake | Prof. Leon Sterling | To be completed at the handover meeting |
+| GitHub repository (`smitsutake/mm-local-editor`) | smitsutake | Prof. Leon Sterling | To be completed at the handover meeting |
 | GitHub Pages (deployment) | smitsutake | Moves with the repository | To be checked after transfer (see Section 13) |
 | Confluence space | Student team | Not transferred | Key documents exported as PDF to `docs/` (see Section 4) |
 
